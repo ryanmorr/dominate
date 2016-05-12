@@ -3,24 +3,9 @@ import { dominate } from '../src/dominate';
 
 describe('dominate', () => {
     it('should throw a type error if passed an invalid argument', () => {
-        // Invalid input
         [null, undefined, 0 / 0, {}, [], () => {}, /foo/].forEach((val) => {
             const fn = () => dominate(val);
             expect(fn).to.throw(TypeError, 'Invalid input, string/number/boolean expected');
-        });
-        // Valid input
-        ['foo', 123, true].forEach((val) => {
-            const fn = () => dominate(val);
-            expect(fn).to.not.throw();
-        });
-    });
-
-    it('should convert plain text, booleans, and numbers to a DOM text node', () => {
-        ['foo', 123, true].forEach((val) => {
-            const node = dominate(val);
-            expect(node.nodeType).to.equal(3);
-            expect(node.nodeName.toLowerCase()).to.equal('#text');
-            expect(node.nodeValue).to.equal(val + '');
         });
     });
 
@@ -42,6 +27,13 @@ describe('dominate', () => {
         expect(frag.textContent).to.equal('foobarbaz');
     });
 
+    it('should convert plain text to a DOM text node', () => {
+        const node = dominate('foo');
+        expect(node.nodeType).to.equal(3);
+        expect(node.nodeName.toLowerCase()).to.equal('#text');
+        expect(node.nodeValue).to.equal('foo');
+    });
+
     it('should ignore leading/trailing whitespace for an HTML string', () => {
         const el = dominate(' <i>foo</i> ');
         expect(el.nodeName.toLowerCase()).to.equal('i');
@@ -51,6 +43,6 @@ describe('dominate', () => {
     it('should preserve leading/trailing whitespace for plain text', () => {
         const node = dominate(' some random text  ');
         expect(node.nodeName.toLowerCase()).to.equal('#text');
-        expect(node.textContent).to.equal(' some random text  ');
+        expect(node.nodeValue).to.equal(' some random text  ');
     });
 });

@@ -14,10 +14,6 @@ export function dominate(html, doc = document) {
     if (!isValid(html)) {
         throw new TypeError('Invalid input, string/number/boolean expected');
     }
-    // Coerce html param to string if it's not a string
-    if (typeof html !== 'string') {
-        html = html + '';
-    }
     // If the html param is not an HTML string,
     // return a text node
     if (!htmlRe.test(html)) {
