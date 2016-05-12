@@ -1,17 +1,16 @@
-// Create parsing element
-const div = document.createElement('div');
-
 export function dominate(html, doc = document) {
+    // Create parsing element
+    const el = doc.createElement('div');
     // Parse HTML string
-    div.innerHTML = html;
+    el.innerHTML = html;
     // Single element
-    if (div.firstChild === div.lastChild) {
-        return div.removeChild(div.firstChild);
+    if (el.childNodes.length === 1) {
+        return el.removeChild(el.firstChild);
     }
     // Multiple elements
     const frag = doc.createDocumentFragment();
-    while (div.firstChild) {
-        frag.appendChild(div.firstChild);
+    while (el.firstChild) {
+        frag.appendChild(el.firstChild);
     }
     return frag;
 }
