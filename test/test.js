@@ -41,4 +41,16 @@ describe('dominate', () => {
         expect(frag.querySelectorAll('em')).to.have.lengthOf(1);
         expect(frag.textContent).to.equal('foobarbaz');
     });
+
+    it('should ignore leading/trailing whitespace for an HTML string', () => {
+        const el = dominate(' <i>foo</i> ');
+        expect(el.nodeName.toLowerCase()).to.equal('i');
+        expect(el.textContent).to.equal('foo');
+    });
+
+    it('should preserve leading/trailing whitespace for plain text', () => {
+        const node = dominate(' some random text  ');
+        expect(node.nodeName.toLowerCase()).to.equal('#text');
+        expect(node.textContent).to.equal(' some random text  ');
+    });
 });

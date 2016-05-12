@@ -23,6 +23,8 @@ export function dominate(html, doc = document) {
     if (!htmlRe.test(html)) {
         return doc.createTextNode(html);
     }
+    // Trim HTML string
+    html = html.trim();
     // Create parsing element
     const el = doc.createElement('div');
     // Parse HTML string
