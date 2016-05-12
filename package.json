@@ -33,6 +33,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.3",
     "jsdom": "^9.0.0",
+    "jsdom-global": "^1.7.0",
     "mocha": "^2.4.5",
     "sinon": "^1.17.4",
     "vinyl-buffer": "^1.0.0",

@@ -52,8 +52,12 @@ gulp.task('lint', () => {
 gulp.task('test', () => {
     return gulp.src(config.specs)
         .pipe(mocha({
+            ui: 'bdd',
             compilers: [
-                'js:babel-core/register'
+                'babel-core/register'
+            ],
+            require: [
+                'jsdom-global/register'
             ]
         }));
 });
