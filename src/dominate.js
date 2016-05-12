@@ -1,5 +1,5 @@
 // Detect HTML string
-const htmlRe = /^<[a-z][\s\S]*>$/;
+const htmlRe = /<[a-z][\s\S]*>/;
 
 // Validate param
 function isValid(obj) {
@@ -10,7 +10,7 @@ function isValid(obj) {
 }
 
 export function dominate(html, doc = document) {
-    // Validate param
+    // Validate paramater
     if (!isValid(html)) {
         throw new TypeError('Invalid input, string/number/boolean expected');
     }
