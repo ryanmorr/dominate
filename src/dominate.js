@@ -10,11 +10,15 @@ function isValid(obj) {
 }
 
 export function dominate(html, doc = document) {
-    // Validate paramater
+    // Validate html param
     if (!isValid(html)) {
         throw new TypeError('Invalid input, string/number/boolean expected');
     }
-    // If the parameter is not an HTML string,
+    // Coerce html param to string if it's not a string
+    if (typeof html !== 'string') {
+        html = html + '';
+    }
+    // If the html param is not an HTML string,
     // return a text node
     if (!htmlRe.test(html)) {
         return doc.createTextNode(html);
@@ -27,7 +31,7 @@ export function dominate(html, doc = document) {
     if (el.childNodes.length === 1) {
         return el.removeChild(el.firstChild);
     }
-    // Multiple elements
+    // Use a document fragment for multiple elements
     const frag = doc.createDocumentFragment();
     while (el.firstChild) {
         frag.appendChild(el.firstChild);
