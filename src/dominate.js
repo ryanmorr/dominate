@@ -1,7 +1,19 @@
 // Detect HTML string
 const htmlRe = /^<[a-z][\s\S]*>$/;
 
+// Validate param
+function isValid(obj) {
+    const type = typeof obj;
+    return type === 'string' ||
+        type === 'boolean' ||
+        (type === 'number' && obj === obj); // eslint-disable-line no-self-compare
+}
+
 export function dominate(html, doc = document) {
+    // Validate param
+    if (!isValid(html)) {
+        throw new TypeError('Invalid input, string/number/boolean expected');
+    }
     // If the parameter is not an HTML string,
     // return a text node
     if (!htmlRe.test(html)) {

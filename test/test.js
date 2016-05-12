@@ -2,6 +2,19 @@ import { expect } from 'chai';
 import { dominate } from '../src/dominate';
 
 describe('dominate', () => {
+    it('should throw error if passed an invalid argument', () => {
+        // Invalid input
+        [null, undefined, 0 / 0, {}, [], () => {}, /foo/].forEach((val) => {
+            const fn = () => dominate(val);
+            expect(fn).to.throw(TypeError, 'Invalid input, string/number/boolean expected');
+        });
+        // Valid input
+        ['foo', 123, true].forEach((val) => {
+            const fn = () => dominate(val);
+            expect(fn).to.not.throw();
+        });
+    });
+
     it('should convert plain text, booleans, and numbers to a DOM text node', () => {
         ['foo', 123, true].forEach((val) => {
             const node = dominate(val);
