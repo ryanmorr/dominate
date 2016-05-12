@@ -2,6 +2,15 @@ import { expect } from 'chai';
 import { dominate } from '../src/dominate';
 
 describe('dominate', () => {
+    it('should convert plain text, booleans, and numbers to a DOM text node', () => {
+        ['foo', 123, true].forEach((val) => {
+            const node = dominate(val);
+            expect(node.nodeType).to.equal(3);
+            expect(node.nodeName.toLowerCase()).to.equal('#text');
+            expect(node.nodeValue).to.equal(val + '');
+        });
+    });
+
     it('should convert a single element HTML string into a DOM element', () => {
         const el = dominate('<div></div>');
         expect(el.nodeType).to.equal(1);
