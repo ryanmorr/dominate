@@ -1,7 +1,13 @@
-// Detect HTML string
+// Regex to detect HTML string
 const htmlRe = /<[a-z][\s\S]*>/;
 
-// Validate param
+/**
+ * Validate an HTML string
+ *
+ * @param {*} obj
+ * @return {Boolean}
+ * @api private
+ */
 function isValid(obj) {
     const type = typeof obj;
     return type === 'string' ||
@@ -9,6 +15,14 @@ function isValid(obj) {
         (type === 'number' && obj === obj); // eslint-disable-line no-self-compare
 }
 
+/**
+ * Convert a string into a DOM node
+ *
+ * @param {String} html
+ * @param {Document} doc
+ * @return {Element|TextNode|DocumentFragment}
+ * @api public
+ */
 export function dominate(html, doc = document) {
     // Validate html param
     if (!isValid(html)) {
