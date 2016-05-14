@@ -16,19 +16,6 @@ wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.the
 wrapMap.th = wrapMap.td;
 
 /**
- * Validate an HTML string
- *
- * @param {*} obj
- * @return {Boolean}
- * @api private
- */
-function isValid(obj) {
-    const type = typeof obj;
-    // eslint-disable-next-line no-self-compare
-    return type === 'string' || type === 'boolean' || (type === 'number' && obj === obj);
-}
-
-/**
  * Convert a string into a DOM node
  *
  * @param {String} html
@@ -38,17 +25,18 @@ function isValid(obj) {
  */
 export function dominate(html, doc = document) {
     // Validate html param
-    if (!isValid(html)) {
+    if (~~('string boolean number').indexOf(typeof html)) {
         throw new TypeError('Invalid input, string/number/boolean expected');
     }
-    // Get the tag name
+    // Parse the HTML string for a tag name
     const match = tagNameRe.exec(html);
     // If no tag name exists, treat it as plain text
     if (!match) {
         return doc.createTextNode(html);
     }
-    // Wrap the element in the appropriate container
+    // Get the tag name
     const tag = match[1];
+    // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;
     html = wrap[1] + html.trim() + wrap[2];
     // Get the depth of the element in the DOM tree

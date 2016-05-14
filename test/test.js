@@ -3,7 +3,7 @@ import { dominate } from '../src/dominate';
 
 describe('dominate', () => {
     it('should throw a type error if passed an invalid argument', () => {
-        [null, undefined, 0 / 0, {}, [], () => {}, /foo/].forEach((val) => {
+        [null, undefined, {}, [], () => {}, /foo/].forEach((val) => {
             const fn = () => dominate(val);
             expect(fn).to.throw(TypeError, 'Invalid input, string/number/boolean expected');
         });
