@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { jsdom } from 'jsdom';
 import { dominate } from '../src/dominate';
 
 describe('dominate', () => {
@@ -32,6 +33,12 @@ describe('dominate', () => {
         expect(node.nodeType).to.equal(3);
         expect(node.nodeName.toLowerCase()).to.equal('#text');
         expect(node.nodeValue).to.equal('foo');
+    });
+
+    it('should support a document object as an optional second argument', () => {
+        const doc = jsdom('<html><body></body></html>');
+        const el = dominate('<div></div>', doc);
+        expect(el.ownerDocument).to.equal(doc);
     });
 
     it('should ignore leading/trailing whitespace for an HTML string', () => {
