@@ -34,6 +34,61 @@ describe('dominate', () => {
         expect(node.nodeValue).to.equal('foo');
     });
 
+    it('should support td elements', () => {
+        const el = dominate('<td></td>');
+        expect(el.nodeName.toLowerCase()).to.equal('td');
+    });
+
+    it('should support tr elements', () => {
+        const el = dominate('<tr></tr>');
+        expect(el.nodeName.toLowerCase()).to.equal('tr');
+    });
+
+    it('should support th elements', () => {
+        const el = dominate('<th></th>');
+        expect(el.nodeName.toLowerCase()).to.equal('th');
+    });
+
+    it('should support thead elements', () => {
+        const el = dominate('<thead></thead>');
+        expect(el.nodeName.toLowerCase()).to.equal('thead');
+    });
+
+    it('should support tbody elements', () => {
+        const el = dominate('<tbody></tbody>');
+        expect(el.nodeName.toLowerCase()).to.equal('tbody');
+    });
+
+    it('should support thead elements', () => {
+        const el = dominate('<thead></thead>');
+        expect(el.nodeName.toLowerCase()).to.equal('thead');
+    });
+
+    it('should support tfoot elements', () => {
+        const el = dominate('<tfoot></tfoot>');
+        expect(el.nodeName.toLowerCase()).to.equal('tfoot');
+    });
+
+    it('should support col elements', () => {
+        const el = dominate('<col></col>');
+        expect(el.nodeName.toLowerCase()).to.equal('col');
+    });
+
+    it('should support colgroup elements', () => {
+        const el = dominate('<colgroup></colgroup>');
+        expect(el.nodeName.toLowerCase()).to.equal('colgroup');
+    });
+
+    it('should support caption elements', () => {
+        const el = dominate('<caption></caption>');
+        expect(el.nodeName.toLowerCase()).to.equal('caption');
+    });
+
+    it('should support legend elements', () => {
+        const el = dominate('<legend></legend>');
+        expect(el.nodeName.toLowerCase()).to.equal('legend');
+    });
+
     it('should ignore leading/trailing whitespace for an HTML string', () => {
         const el = dominate(' <i>foo</i> ');
         expect(el.nodeName.toLowerCase()).to.equal('i');
