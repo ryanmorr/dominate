@@ -35,17 +35,15 @@ export function dominate(html, doc = document) {
         return doc.createTextNode(html);
     }
     // Get the tag name
-    const tag = match[1];
+    const tag = match[1].toLowerCase();
     // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;
     html = wrap[1] + html.trim() + wrap[2];
-    // Get the depth of the element in the DOM tree
-    let depth = wrap[0];
-    // Create parsing element
-    let el = doc.createElement('div');
     // Parse HTML string
+    let el = doc.createElement('div');
     el.innerHTML = html;
     // Descend through wrappers to get the right element
+    let depth = wrap[0];
     while (depth--) {
         el = el.lastChild;
     }
