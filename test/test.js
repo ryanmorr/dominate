@@ -34,6 +34,24 @@ describe('dominate', () => {
         expect(node.nodeValue).to.equal('foo');
     });
 
+    it('should ignore leading/trailing whitespace for an HTML string', () => {
+        const el = dominate(' <i>foo</i> ');
+        expect(el.nodeName.toLowerCase()).to.equal('i');
+        expect(el.textContent).to.equal('foo');
+    });
+
+    it('should preserve leading/trailing whitespace for plain text', () => {
+        const node = dominate(' some random text  ');
+        expect(node.nodeName.toLowerCase()).to.equal('#text');
+        expect(node.nodeValue).to.equal(' some random text  ');
+    });
+
+    it('should parse attributes', () => {
+        const el = dominate('<div id="foo" class="bar"></div');
+        expect(el.id).to.equal('foo');
+        expect(el.className).to.equal('bar');
+    });
+
     it('should support td elements', () => {
         const el = dominate('<td></td>');
         expect(el.nodeName.toLowerCase()).to.equal('td');
@@ -87,17 +105,5 @@ describe('dominate', () => {
     it('should support legend elements', () => {
         const el = dominate('<legend></legend>');
         expect(el.nodeName.toLowerCase()).to.equal('legend');
-    });
-
-    it('should ignore leading/trailing whitespace for an HTML string', () => {
-        const el = dominate(' <i>foo</i> ');
-        expect(el.nodeName.toLowerCase()).to.equal('i');
-        expect(el.textContent).to.equal('foo');
-    });
-
-    it('should preserve leading/trailing whitespace for plain text', () => {
-        const node = dominate(' some random text  ');
-        expect(node.nodeName.toLowerCase()).to.equal('#text');
-        expect(node.nodeValue).to.equal(' some random text  ');
     });
 });
