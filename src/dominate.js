@@ -23,7 +23,7 @@ wrapMap.th = wrapMap.td;
  * @return {Element|TextNode|DocumentFragment}
  * @api public
  */
-export function dominate(html, doc = document) {
+function dominate(html, doc = document) {
     // Validate html param
     if (~~('string boolean number').indexOf(typeof html)) {
         throw new TypeError('Invalid input, string/number/boolean expected');
@@ -57,4 +57,13 @@ export function dominate(html, doc = document) {
         frag.appendChild(el.firstChild);
     }
     return frag;
+}
+
+// Expose `dominate`
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = dominate;
+} else if(typeof define === 'function' && define.amd) {
+    define(function(){ return dominate; });
+} else {
+    window['dominate'] = dominate;
 }
