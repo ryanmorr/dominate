@@ -1,5 +1,5 @@
 // Regex to extract the tag name
-const tagNameRe = /<([\w:]+)/;
+const tagNameRe = /<([\w-]+)/;
 
 // Prevent the parser from ignoring certain
 // elements by wrapping them with the necessary
