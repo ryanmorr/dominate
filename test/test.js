@@ -54,7 +54,7 @@ describe('dominate', () => {
     });
 
     it('should parse attributes', () => {
-        const el = dominate('<div id="foo" class="bar"></div');
+        const el = dominate('<div id="foo" class="bar"></div>');
         expect(el.id).to.equal('foo');
         expect(el.className).to.equal('bar');
     });
