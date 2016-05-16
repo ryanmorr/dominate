@@ -4,7 +4,7 @@ const tagNameRe = /<([\w-]+)/;
 // Prevent the parser from ignoring certain
 // elements by wrapping them with the necessary
 // parent elements to appease XHTML
-// (courtesy of jQuery)
+// (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
 const wrapMap = {
     thead: [1, '<table>', '</table>'],
     col: [2, '<table><colgroup>', '</colgroup></table>'],
