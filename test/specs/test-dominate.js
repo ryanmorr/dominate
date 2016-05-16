@@ -35,7 +35,7 @@ describe('dominate', () => {
     });
 
     it('should support a document object as an optional second argument', () => {
-        const doc = jsdom('<html><body></body></html>');
+        const doc = document.implementation.createHTMLDocument('');
         const el = dominate('<div></div>', doc);
         expect(el.ownerDocument).to.equal(doc);
     });
