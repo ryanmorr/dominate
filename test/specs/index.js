@@ -1,1 +1,1 @@
-import './test-dominate.js'
+import './test-dominate.js';
