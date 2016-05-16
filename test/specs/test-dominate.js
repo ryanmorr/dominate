@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-import { jsdom } from 'jsdom';
-import dominate from '../src/dominate';
+import dominate from '../../src/dominate';
 
 describe('dominate', () => {
     it('should throw a type error if passed an invalid argument', () => {
