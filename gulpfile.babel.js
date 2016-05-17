@@ -26,7 +26,7 @@ const config = {
         specs: './test/specs/*.js',
         entryFile: './test/specs/index.js',
         outputDir: './test/',
-        outputFile: 'specs.js'
+        outputFile: 'tests.js'
     }
 };
 
