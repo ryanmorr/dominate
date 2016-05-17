@@ -8124,6 +8124,12 @@ Library.prototype.test = function(obj, type) {
         }
         // Get the tag name
         var tag = match[1].toLowerCase();
+        // Support <body> and <html> elements
+        if (~'body html'.indexOf(tag)) {
+            var docElement = doc.implementation.createHTMLDocument('').documentElement;
+            docElement.innerHTML = html;
+            return tag === 'html' ? docElement : docElement.lastChild;
+        }
         // Wrap the element in the appropriate container
         var wrap = wrapMap[tag] || wrapMap.default;
         html = wrap[1] + html.trim() + wrap[2];
@@ -8245,6 +8251,16 @@ Library.prototype.test = function(obj, type) {
             var el = (0, _dominate2.default)('<div id="foo" class="bar"></div>');
             (0, _chai.expect)(el.id).to.equal('foo');
             (0, _chai.expect)(el.className).to.equal('bar');
+        });
+
+        it('should support body elements', function () {
+            var el = (0, _dominate2.default)('<body></body>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('body');
+        });
+
+        it('should support html elements', function () {
+            var el = (0, _dominate2.default)('<html></html>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
         });
 
         it('should support td elements', function () {

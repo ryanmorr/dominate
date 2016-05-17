@@ -58,6 +58,16 @@ describe('dominate', () => {
         expect(el.className).to.equal('bar');
     });
 
+    it('should support body elements', () => {
+        const el = dominate('<body></body>');
+        expect(el.nodeName.toLowerCase()).to.equal('body');
+    });
+
+    it('should support html elements', () => {
+        const el = dominate('<html></html>');
+        expect(el.nodeName.toLowerCase()).to.equal('html');
+    });
+
     it('should support td elements', () => {
         const el = dominate('<td></td>');
         expect(el.nodeName.toLowerCase()).to.equal('td');

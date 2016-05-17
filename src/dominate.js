@@ -36,6 +36,12 @@ export default function dominate(html, doc = document) {
     }
     // Get the tag name
     const tag = match[1].toLowerCase();
+    // Support <body> and <html> elements
+    if (~('body html').indexOf(tag)) {
+        const docElement = doc.implementation.createHTMLDocument('').documentElement;
+        docElement.innerHTML = html;
+        return tag === 'html' ? docElement : docElement.lastChild;
+    }
     // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;
     html = wrap[1] + html.trim() + wrap[2];
