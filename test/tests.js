@@ -8126,9 +8126,11 @@ Library.prototype.test = function(obj, type) {
         var tag = match[1].toLowerCase();
         // Support <body> and <html> elements
         if (~'body html'.indexOf(tag)) {
-            var docElement = doc.implementation.createHTMLDocument('').documentElement;
+            var newDoc = doc.implementation.createHTMLDocument('');
+            var docElement = newDoc.documentElement;
             docElement.innerHTML = html;
-            return tag === 'html' ? docElement : docElement.lastChild;
+            var _el = tag === 'html' ? docElement : docElement.lastChild;
+            return _el.parentNode.removeChild(_el);
         }
         // Wrap the element in the appropriate container
         var wrap = wrapMap[tag] || wrapMap.default;
