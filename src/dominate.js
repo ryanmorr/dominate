@@ -1,6 +1,17 @@
 // Regex to extract the tag name
 const tagNameRe = /<([\w-]+)/;
 
+// Determine if `DOMParser` supports 'text/html'
+const supportsDOMParser = (() => {
+    try {
+        if ((new DOMParser()).parseFromString('', 'text/html')) {
+            return true;
+        }
+    } catch (e) {
+        return false;
+    }
+})();
+
 // Prevent the parser from ignoring certain
 // elements by wrapping them with the necessary
 // parent elements to appease XHTML
@@ -14,6 +25,38 @@ const wrapMap = {
 };
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 wrapMap.th = wrapMap.td;
+
+/**
+ * Copy the attributes from one node
+ * to another
+ *
+ * @param {Element} el
+ * @param {Element} target
+ * @return {Element}
+ * @api private
+ */
+function copyAttributes(el, target) {
+    const attrs = target.attributes;
+    for (let i = 0, len = attrs.length, attr; i < len; i++) {
+        attr = attrs[i];
+        el.setAttribute(attr.name, attr.value);
+    }
+    return el;
+}
+
+/**
+ * Parse HTML and XML documents
+ *
+ * @param {String} markup
+ * @param {String} type
+ * @return {Element}
+ * @api private
+ */
+function parseDocument(markup, type) {
+    const parser = new DOMParser();
+    const newDoc = parser.parseFromString(markup, type);
+    return newDoc.removeChild(newDoc.documentElement);
+}
 
 /**
  * Convert a string into a DOM node
@@ -36,13 +79,24 @@ export default function dominate(html, doc = document) {
     }
     // Get the tag name
     const tag = match[1].toLowerCase();
-    // Support <body> and <html> elements
-    if (~('body html').indexOf(tag)) {
-        const newDoc = doc.implementation.createHTMLDocument('');
-        const docElement = newDoc.documentElement;
-        docElement.innerHTML = html;
-        const el = tag === 'html' ? docElement : docElement.lastChild;
-        return el.parentNode.removeChild(el);
+    // Support <html> elements
+    if (tag === 'html') {
+        if (supportsDOMParser) {
+            return parseDocument(html, 'text/html');
+        }
+        // Attributes of the <html> element do not get
+        // parsed using `innerHTML` here, so we parse it
+        // as XML and then copy the attributes
+        const el = doc.createElement('html');
+        const xml = parseDocument(html, 'text/xml');
+        el.innerHTML = html;
+        return copyAttributes(el, xml);
+    }
+    // Support <body> and <head> elements
+    if (~('head body').indexOf(tag)) {
+        const el = doc.createElement('html');
+        el.innerHTML = html;
+        return el.removeChild(tag === 'head' ? el.firstChild : el.lastChild);
     }
     // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;

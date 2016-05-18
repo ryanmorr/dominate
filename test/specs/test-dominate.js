@@ -63,9 +63,21 @@ describe('dominate', () => {
         expect(el.nodeName.toLowerCase()).to.equal('body');
     });
 
+    it('should support head elements', () => {
+        const el = dominate('<head></head>');
+        expect(el.nodeName.toLowerCase()).to.equal('head');
+    });
+
     it('should support html elements', () => {
         const el = dominate('<html></html>');
         expect(el.nodeName.toLowerCase()).to.equal('html');
+    });
+
+    it('should support html elements with attributes', () => {
+        const el = dominate('<html id="foo" class="bar"></html>');
+        expect(el.nodeName.toLowerCase()).to.equal('html');
+        expect(el.id).to.equal('foo');
+        expect(el.className).to.equal('bar');
     });
 
     it('should support td elements', () => {

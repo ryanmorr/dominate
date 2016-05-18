@@ -8087,6 +8087,17 @@ Library.prototype.test = function(obj, type) {
     // Regex to extract the tag name
     var tagNameRe = /<([\w-]+)/;
 
+    // Determine if `DOMParser` supports 'text/html'
+    var supportsDOMParser = function () {
+        try {
+            if (new DOMParser().parseFromString('', 'text/html')) {
+                return true;
+            }
+        } catch (e) {
+            return false;
+        }
+    }();
+
     // Prevent the parser from ignoring certain
     // elements by wrapping them with the necessary
     // parent elements to appease XHTML
@@ -8100,6 +8111,38 @@ Library.prototype.test = function(obj, type) {
     };
     wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
     wrapMap.th = wrapMap.td;
+
+    /**
+     * Copy the attributes from one node
+     * to another
+     *
+     * @param {Element} el
+     * @param {Element} target
+     * @return {Element}
+     * @api private
+     */
+    function copyAttributes(el, target) {
+        var attrs = target.attributes;
+        for (var i = 0, len = attrs.length, attr; i < len; i++) {
+            attr = attrs[i];
+            el.setAttribute(attr.name, attr.value);
+        }
+        return el;
+    }
+
+    /**
+     * Parse HTML and XML documents
+     *
+     * @param {String} markup
+     * @param {String} type
+     * @return {Element}
+     * @api private
+     */
+    function parseDocument(markup, type) {
+        var parser = new DOMParser();
+        var newDoc = parser.parseFromString(markup, type);
+        return newDoc.removeChild(newDoc.documentElement);
+    }
 
     /**
      * Convert a string into a DOM node
@@ -8124,13 +8167,24 @@ Library.prototype.test = function(obj, type) {
         }
         // Get the tag name
         var tag = match[1].toLowerCase();
-        // Support <body> and <html> elements
-        if (~'body html'.indexOf(tag)) {
-            var newDoc = doc.implementation.createHTMLDocument('');
-            var docElement = newDoc.documentElement;
-            docElement.innerHTML = html;
-            var _el = tag === 'html' ? docElement : docElement.lastChild;
-            return _el.parentNode.removeChild(_el);
+        // Support <html> elements
+        if (tag === 'html') {
+            if (supportsDOMParser) {
+                return parseDocument(html, 'text/html');
+            }
+            // Attributes of the <html> element do not get
+            // parsed using `innerHTML` here, so we parse it
+            // as XML and then copy the attributes
+            var _el = doc.createElement('html');
+            var xml = parseDocument(html, 'text/xml');
+            _el.innerHTML = html;
+            return copyAttributes(_el, xml);
+        }
+        // Support <body> and <head> elements
+        if (~'head body'.indexOf(tag)) {
+            var _el2 = doc.createElement('html');
+            _el2.innerHTML = html;
+            return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
         }
         // Wrap the element in the appropriate container
         var wrap = wrapMap[tag] || wrapMap.default;
@@ -8260,9 +8314,21 @@ Library.prototype.test = function(obj, type) {
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('body');
         });
 
+        it('should support head elements', function () {
+            var el = (0, _dominate2.default)('<head></head>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('head');
+        });
+
         it('should support html elements', function () {
             var el = (0, _dominate2.default)('<html></html>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
+        });
+
+        it('should support html elements with attributes', function () {
+            var el = (0, _dominate2.default)('<html id="foo" class="bar"></html>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
+            (0, _chai.expect)(el.id).to.equal('foo');
+            (0, _chai.expect)(el.className).to.equal('bar');
         });
 
         it('should support td elements', function () {
