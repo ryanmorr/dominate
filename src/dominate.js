@@ -45,6 +45,22 @@ function copyAttributes(el, target) {
 }
 
 /**
+ * Create a script element that will
+ * execute
+ *
+ * @param {Element} el
+ * @param {Document} doc
+ * @return {Element}
+ * @api private
+ */
+function createScript(el, doc) {
+    const script = doc.createElement('script');
+    script.async = true;
+    script.text = el.textContent;
+    return copyAttributes(script, el);
+}
+
+/**
  * Parse HTML and XML documents
  *
  * @param {String} markup
@@ -108,6 +124,10 @@ export default function dominate(html, doc = document) {
     let depth = wrap[0];
     while (depth--) {
         el = el.lastChild;
+    }
+    // Support <script> elements
+    if (tag === 'script') {
+        return createScript(el.firstChild, doc);
     }
     // Single element
     if (el.childNodes.length === 1) {

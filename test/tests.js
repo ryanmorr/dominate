@@ -8131,6 +8131,22 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
+     * Create a script element that will
+     * execute
+     *
+     * @param {Element} el
+     * @param {Document} doc
+     * @return {Element}
+     * @api private
+     */
+    function createScript(el, doc) {
+        var script = doc.createElement('script');
+        script.async = true;
+        script.text = el.textContent;
+        return copyAttributes(script, el);
+    }
+
+    /**
      * Parse HTML and XML documents
      *
      * @param {String} markup
@@ -8196,6 +8212,10 @@ Library.prototype.test = function(obj, type) {
         var depth = wrap[0];
         while (depth--) {
             el = el.lastChild;
+        }
+        // Support <script> elements
+        if (tag === 'script') {
+            return createScript(el.firstChild, doc);
         }
         // Single element
         if (el.childNodes.length === 1) {
@@ -8326,6 +8346,32 @@ Library.prototype.test = function(obj, type) {
         it('should support legend elements', function () {
             var el = (0, _dominate2.default)('<legend></legend>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('legend');
+        });
+
+        it('should execute script content', function () {
+            var el = (0, _dominate2.default)('<script>window.foo = "foo";</script>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
+            /* eslint-disable no-unused-expressions */
+            (0, _chai.expect)(window.foo).to.not.exist;
+            document.body.appendChild(el);
+            (0, _chai.expect)(window.foo).to.exist;
+            /* eslint-enable no-unused-expressions */
+            delete window.foo;
+        });
+
+        it('should load script src', function (done) {
+            var el = (0, _dominate2.default)('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
+            /* eslint-disable no-unused-expressions */
+            (0, _chai.expect)(window.jQuery).to.not.exist;
+            el.onload = function onLoad() {
+                (0, _chai.expect)(window.jQuery).to.exist;
+                delete window.$;
+                delete window.jQuery;
+                done();
+            };
+            document.body.appendChild(el);
+            /* eslint-enable no-unused-expressions */
         });
     });
 });

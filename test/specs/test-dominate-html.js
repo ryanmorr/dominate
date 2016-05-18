@@ -78,4 +78,30 @@ describe('dominate - HTML', () => {
         const el = dominate('<legend></legend>');
         expect(el.nodeName.toLowerCase()).to.equal('legend');
     });
+
+    it('should execute script content', () => {
+        const el = dominate('<script>window.foo = "foo";</script>');
+        expect(el.nodeName.toLowerCase()).to.equal('script');
+        /* eslint-disable no-unused-expressions */
+        expect(window.foo).to.not.exist;
+        document.body.appendChild(el);
+        expect(window.foo).to.exist;
+        /* eslint-enable no-unused-expressions */
+        delete window.foo;
+    });
+
+    it('should load and execute script src', (done) => {
+        const el = dominate('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>');
+        expect(el.nodeName.toLowerCase()).to.equal('script');
+        /* eslint-disable no-unused-expressions */
+        expect(window.jQuery).to.not.exist;
+        el.onload = function onLoad() {
+            expect(window.jQuery).to.exist;
+            delete window.$;
+            delete window.jQuery;
+            done();
+        };
+        document.body.appendChild(el);
+        /* eslint-enable no-unused-expressions */
+    });
 });
