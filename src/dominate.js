@@ -53,7 +53,7 @@ function copyAttributes(el, target) {
  * @return {Element}
  * @api private
  */
-function createScript(el, doc) {
+function copyScript(el, doc) {
     const script = doc.createElement('script');
     script.async = true;
     script.text = el.textContent;
@@ -95,6 +95,8 @@ export default function dominate(html, doc = document) {
     }
     // Get the tag name
     const tag = match[1].toLowerCase();
+    // Trim the HTML string
+    html = html.trim();
     // Support <html> elements
     if (tag === 'html') {
         if (supportsDOMParser) {
@@ -116,10 +118,9 @@ export default function dominate(html, doc = document) {
     }
     // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;
-    html = wrap[1] + html.trim() + wrap[2];
     // Parse HTML string
     let el = doc.createElement('div');
-    el.innerHTML = html;
+    el.innerHTML = wrap[1] + html + wrap[2];
     // Descend through wrappers to get the right element
     let depth = wrap[0];
     while (depth--) {
@@ -127,7 +128,7 @@ export default function dominate(html, doc = document) {
     }
     // Support <script> elements
     if (tag === 'script') {
-        return createScript(el.firstChild, doc);
+        return copyScript(el.firstChild, doc);
     }
     // Single element
     if (el.childNodes.length === 1) {

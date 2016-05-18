@@ -8139,7 +8139,7 @@ Library.prototype.test = function(obj, type) {
      * @return {Element}
      * @api private
      */
-    function createScript(el, doc) {
+    function copyScript(el, doc) {
         var script = doc.createElement('script');
         script.async = true;
         script.text = el.textContent;
@@ -8183,6 +8183,8 @@ Library.prototype.test = function(obj, type) {
         }
         // Get the tag name
         var tag = match[1].toLowerCase();
+        // Trim the HTML string
+        html = html.trim();
         // Support <html> elements
         if (tag === 'html') {
             if (supportsDOMParser) {
@@ -8204,10 +8206,9 @@ Library.prototype.test = function(obj, type) {
         }
         // Wrap the element in the appropriate container
         var wrap = wrapMap[tag] || wrapMap.default;
-        html = wrap[1] + html.trim() + wrap[2];
         // Parse HTML string
         var el = doc.createElement('div');
-        el.innerHTML = html;
+        el.innerHTML = wrap[1] + html + wrap[2];
         // Descend through wrappers to get the right element
         var depth = wrap[0];
         while (depth--) {
@@ -8215,7 +8216,7 @@ Library.prototype.test = function(obj, type) {
         }
         // Support <script> elements
         if (tag === 'script') {
-            return createScript(el.firstChild, doc);
+            return copyScript(el.firstChild, doc);
         }
         // Single element
         if (el.childNodes.length === 1) {
@@ -8359,7 +8360,7 @@ Library.prototype.test = function(obj, type) {
             delete window.foo;
         });
 
-        it('should load script src', function (done) {
+        it('should load and execute script src', function (done) {
             var el = (0, _dominate2.default)('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
             /* eslint-disable no-unused-expressions */
