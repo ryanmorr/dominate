@@ -8214,19 +8214,123 @@ Library.prototype.test = function(obj, type) {
 },{}],42:[function(require,module,exports){
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['./test-dominate.js'], factory);
+    define(['./test-dominate.js', './test-dominate-html.js'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(require('./test-dominate.js'));
+    factory(require('./test-dominate.js'), require('./test-dominate-html.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(global.testDominate);
+    factory(global.testDominate, global.testDominateHtml);
     global.index = mod.exports;
   }
 })(this, function () {});
 
-},{"./test-dominate.js":43}],43:[function(require,module,exports){
+},{"./test-dominate-html.js":43,"./test-dominate.js":44}],43:[function(require,module,exports){
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['chai', '../../src/dominate'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(require('chai'), require('../../src/dominate'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(global.chai, global.dominate);
+        global.testDominateHtml = mod.exports;
+    }
+})(this, function (_chai, _dominate) {
+    'use strict';
+
+    var _dominate2 = _interopRequireDefault(_dominate);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    describe('dominate - HTML', function () {
+        it('should support body elements', function () {
+            var el = (0, _dominate2.default)('<body></body>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('body');
+        });
+
+        it('should support head elements', function () {
+            var el = (0, _dominate2.default)('<head></head>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('head');
+        });
+
+        it('should support html elements', function () {
+            var el = (0, _dominate2.default)('<html></html>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
+        });
+
+        it('should support html elements with attributes', function () {
+            var el = (0, _dominate2.default)('<html id="foo" class="bar"></html>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
+            (0, _chai.expect)(el.id).to.equal('foo');
+            (0, _chai.expect)(el.className).to.equal('bar');
+        });
+
+        it('should support td elements', function () {
+            var el = (0, _dominate2.default)('<td></td>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('td');
+        });
+
+        it('should support tr elements', function () {
+            var el = (0, _dominate2.default)('<tr></tr>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tr');
+        });
+
+        it('should support th elements', function () {
+            var el = (0, _dominate2.default)('<th></th>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('th');
+        });
+
+        it('should support thead elements', function () {
+            var el = (0, _dominate2.default)('<thead></thead>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
+        });
+
+        it('should support tbody elements', function () {
+            var el = (0, _dominate2.default)('<tbody></tbody>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tbody');
+        });
+
+        it('should support thead elements', function () {
+            var el = (0, _dominate2.default)('<thead></thead>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
+        });
+
+        it('should support tfoot elements', function () {
+            var el = (0, _dominate2.default)('<tfoot></tfoot>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tfoot');
+        });
+
+        it('should support col elements', function () {
+            var el = (0, _dominate2.default)('<col></col>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('col');
+        });
+
+        it('should support colgroup elements', function () {
+            var el = (0, _dominate2.default)('<colgroup></colgroup>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('colgroup');
+        });
+
+        it('should support caption elements', function () {
+            var el = (0, _dominate2.default)('<caption></caption>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('caption');
+        });
+
+        it('should support legend elements', function () {
+            var el = (0, _dominate2.default)('<legend></legend>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('legend');
+        });
+    });
+});
+
+},{"../../src/dominate":41,"chai":5}],44:[function(require,module,exports){
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['chai', '../../src/dominate'], factory);
@@ -8320,83 +8424,6 @@ Library.prototype.test = function(obj, type) {
             var el = (0, _dominate2.default)('<div id="foo" class="bar"></div>');
             (0, _chai.expect)(el.id).to.equal('foo');
             (0, _chai.expect)(el.className).to.equal('bar');
-        });
-
-        it('should support body elements', function () {
-            var el = (0, _dominate2.default)('<body></body>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('body');
-        });
-
-        it('should support head elements', function () {
-            var el = (0, _dominate2.default)('<head></head>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('head');
-        });
-
-        it('should support html elements', function () {
-            var el = (0, _dominate2.default)('<html></html>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
-        });
-
-        it('should support html elements with attributes', function () {
-            var el = (0, _dominate2.default)('<html id="foo" class="bar"></html>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
-            (0, _chai.expect)(el.id).to.equal('foo');
-            (0, _chai.expect)(el.className).to.equal('bar');
-        });
-
-        it('should support td elements', function () {
-            var el = (0, _dominate2.default)('<td></td>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('td');
-        });
-
-        it('should support tr elements', function () {
-            var el = (0, _dominate2.default)('<tr></tr>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tr');
-        });
-
-        it('should support th elements', function () {
-            var el = (0, _dominate2.default)('<th></th>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('th');
-        });
-
-        it('should support thead elements', function () {
-            var el = (0, _dominate2.default)('<thead></thead>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
-        });
-
-        it('should support tbody elements', function () {
-            var el = (0, _dominate2.default)('<tbody></tbody>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tbody');
-        });
-
-        it('should support thead elements', function () {
-            var el = (0, _dominate2.default)('<thead></thead>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
-        });
-
-        it('should support tfoot elements', function () {
-            var el = (0, _dominate2.default)('<tfoot></tfoot>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tfoot');
-        });
-
-        it('should support col elements', function () {
-            var el = (0, _dominate2.default)('<col></col>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('col');
-        });
-
-        it('should support colgroup elements', function () {
-            var el = (0, _dominate2.default)('<colgroup></colgroup>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('colgroup');
-        });
-
-        it('should support caption elements', function () {
-            var el = (0, _dominate2.default)('<caption></caption>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('caption');
-        });
-
-        it('should support legend elements', function () {
-            var el = (0, _dominate2.default)('<legend></legend>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('legend');
         });
     });
 });
