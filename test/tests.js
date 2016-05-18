@@ -8251,6 +8251,8 @@ Library.prototype.test = function(obj, type) {
     }
 
     describe('dominate', function () {
+        var toString = {}.toString;
+
         it('should throw a type error if passed an invalid argument', function () {
             [null, undefined, {}, [], function () {}, /foo/].forEach(function (val) {
                 var fn = function fn() {
@@ -8264,25 +8266,36 @@ Library.prototype.test = function(obj, type) {
             var el = (0, _dominate2.default)('<div>foo</div>');
             (0, _chai.expect)(el.nodeType).to.equal(1);
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
+            (0, _chai.expect)(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
             (0, _chai.expect)(el.textContent).to.equal('foo');
+            (0, _chai.expect)(el.ownerDocument).to.equal(document);
         });
 
         it('should convert a multiple element HTML string into a DOM fragment', function () {
             var frag = (0, _dominate2.default)('<div>foo</div><span>bar</span><em>baz</em>');
             (0, _chai.expect)(frag.nodeType).to.equal(11);
             (0, _chai.expect)(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
+            (0, _chai.expect)(toString.call(frag)).to.equal('[object DocumentFragment]');
             (0, _chai.expect)(frag.querySelectorAll('*')).to.have.lengthOf(3);
             (0, _chai.expect)(frag.querySelectorAll('div')).to.have.lengthOf(1);
             (0, _chai.expect)(frag.querySelectorAll('span')).to.have.lengthOf(1);
             (0, _chai.expect)(frag.querySelectorAll('em')).to.have.lengthOf(1);
             (0, _chai.expect)(frag.textContent).to.equal('foobarbaz');
+            (0, _chai.expect)(frag.ownerDocument).to.equal(document);
         });
 
         it('should convert plain text to a DOM text node', function () {
             var node = (0, _dominate2.default)('foo');
             (0, _chai.expect)(node.nodeType).to.equal(3);
             (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
+            (0, _chai.expect)(toString.call(node)).to.equal('[object Text]');
             (0, _chai.expect)(node.nodeValue).to.equal('foo');
+            (0, _chai.expect)(node.ownerDocument).to.equal(document);
+        });
+
+        it('should return a node with no parent node', function () {
+            var el = (0, _dominate2.default)('<div>foo</div>');
+            (0, _chai.expect)(el.parentNode).to.equal(null);
         });
 
         it('should support a document object as an optional second argument', function () {

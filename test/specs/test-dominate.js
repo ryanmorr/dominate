@@ -2,6 +2,8 @@ import { expect } from 'chai';
 import dominate from '../../src/dominate';
 
 describe('dominate', () => {
+    const toString = {}.toString;
+
     it('should throw a type error if passed an invalid argument', () => {
         [null, undefined, {}, [], () => {}, /foo/].forEach((val) => {
             const fn = () => dominate(val);
@@ -13,25 +15,36 @@ describe('dominate', () => {
         const el = dominate('<div>foo</div>');
         expect(el.nodeType).to.equal(1);
         expect(el.nodeName.toLowerCase()).to.equal('div');
+        expect(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
         expect(el.textContent).to.equal('foo');
+        expect(el.ownerDocument).to.equal(document);
     });
 
     it('should convert a multiple element HTML string into a DOM fragment', () => {
         const frag = dominate('<div>foo</div><span>bar</span><em>baz</em>');
         expect(frag.nodeType).to.equal(11);
         expect(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
+        expect(toString.call(frag)).to.equal('[object DocumentFragment]');
         expect(frag.querySelectorAll('*')).to.have.lengthOf(3);
         expect(frag.querySelectorAll('div')).to.have.lengthOf(1);
         expect(frag.querySelectorAll('span')).to.have.lengthOf(1);
         expect(frag.querySelectorAll('em')).to.have.lengthOf(1);
         expect(frag.textContent).to.equal('foobarbaz');
+        expect(frag.ownerDocument).to.equal(document);
     });
 
     it('should convert plain text to a DOM text node', () => {
         const node = dominate('foo');
         expect(node.nodeType).to.equal(3);
         expect(node.nodeName.toLowerCase()).to.equal('#text');
+        expect(toString.call(node)).to.equal('[object Text]');
         expect(node.nodeValue).to.equal('foo');
+        expect(node.ownerDocument).to.equal(document);
+    });
+
+    it('should return a node with no parent node', () => {
+        const el = dominate('<div>foo</div>');
+        expect(el.parentNode).to.equal(null);
     });
 
     it('should support a document object as an optional second argument', () => {
