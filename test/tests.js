@@ -8349,8 +8349,7 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should load script src', function (done) {
-            var src = 'test-file.js';
-            var el = (0, _dominate2.default)('<script src="' + src + '"></script>');
+            var el = (0, _dominate2.default)('<script src="test-file.js"></script>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
             /* eslint-disable no-unused-expressions */
             (0, _chai.expect)(window.bar).to.not.exist;
@@ -8364,8 +8363,7 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should execute embedded script by default', function () {
-            var code = 'window.foo = "foo";';
-            var el = (0, _dominate2.default)('<div><script>' + code + '</script></div>');
+            var el = (0, _dominate2.default)('<div><script>window.foo = "foo";</script></div>');
             /* eslint-disable no-unused-expressions */
             (0, _chai.expect)(window.foo).to.not.exist;
             document.body.appendChild(el);
@@ -8375,8 +8373,7 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should load embedded script src by default', function (done) {
-            var src = 'test-file.js';
-            var el = (0, _dominate2.default)('<div><script src="' + src + '"></script></div>');
+            var el = (0, _dominate2.default)('<div><script src="test-file.js"></script></div>');
             /* eslint-disable no-unused-expressions */
             (0, _chai.expect)(window.bar).to.not.exist;
             el.firstChild.onload = function onLoad() {

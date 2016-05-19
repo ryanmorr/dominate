@@ -159,8 +159,7 @@ describe('dominate - HTML', () => {
     });
 
     it('should load script src', (done) => {
-        const src = 'test-file.js';
-        const el = dominate(`<script src="${src}"></script>`);
+        const el = dominate('<script src="test-file.js"></script>');
         expect(el.nodeName.toLowerCase()).to.equal('script');
         /* eslint-disable no-unused-expressions */
         expect(window.bar).to.not.exist;
@@ -174,8 +173,7 @@ describe('dominate - HTML', () => {
     });
 
     it('should execute embedded script by default', () => {
-        const code = 'window.foo = "foo";';
-        const el = dominate(`<div><script>${code}</script></div>`);
+        const el = dominate('<div><script>window.foo = "foo";</script></div>');
         /* eslint-disable no-unused-expressions */
         expect(window.foo).to.not.exist;
         document.body.appendChild(el);
@@ -185,8 +183,7 @@ describe('dominate - HTML', () => {
     });
 
     it('should load embedded script src by default', (done) => {
-        const src = 'test-file.js';
-        const el = dominate(`<div><script src="${src}"></script></div>`);
+        const el = dominate('<div><script src="test-file.js"></script></div>');
         /* eslint-disable no-unused-expressions */
         expect(window.bar).to.not.exist;
         el.firstChild.onload = function onLoad() {
