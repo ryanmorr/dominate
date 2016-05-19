@@ -59,7 +59,6 @@ describe('dominate (HTML)', () => {
         'i',
         'ins',
         'kbd',
-        'keygen',
         'label',
         'legend',
         'li',
