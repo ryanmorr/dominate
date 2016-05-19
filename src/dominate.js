@@ -154,11 +154,15 @@ export default function dominate(html, doc = document, execScripts = true) {
     const tag = match[1].toLowerCase();
     // Get DOM object
     const el = parse(html.trim(), tag, doc);
-    // Return is script
+    // If it's a script element, return it as it
+    // should always execute regardless of the
+    // `execScripts` param
     if (tag === 'script') {
         return el;
     }
-    // Replace the scripts elements to enable execution
+    // If `execScripts` is true, replace all script
+    // elements with a new script element to enable
+    // execution, otherwise remove the script elements
     const scripts = el.querySelectorAll('script');
     for (let i = 0, len = scripts.length, script, parent; i < len; i++) {
         script = scripts[i];
