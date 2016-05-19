@@ -8243,7 +8243,9 @@ Library.prototype.test = function(obj, type) {
         var tag = match[1].toLowerCase();
         // Get DOM object
         var el = parse(html.trim(), tag, doc);
-        // Return if script
+        // If it's a script element, return it as it
+        // should always execute regardless of the
+        // `execScripts` param
         if (tag === 'script') {
             return el;
         }
@@ -8347,15 +8349,14 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should load script src', function (done) {
-            var src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+            var src = 'test-file.js';
             var el = (0, _dominate2.default)('<script src="' + src + '"></script>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
             /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.jQuery).to.not.exist;
+            (0, _chai.expect)(window.bar).to.not.exist;
             el.onload = function onLoad() {
-                (0, _chai.expect)(window.jQuery).to.exist;
-                delete window.$;
-                delete window.jQuery;
+                (0, _chai.expect)(window.bar).to.exist;
+                delete window.bar;
                 done();
             };
             document.body.appendChild(el);
@@ -8374,14 +8375,13 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should load embedded script src by default', function (done) {
-            var src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+            var src = 'test-file.js';
             var el = (0, _dominate2.default)('<div><script src="' + src + '"></script></div>');
             /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.jQuery).to.not.exist;
+            (0, _chai.expect)(window.bar).to.not.exist;
             el.firstChild.onload = function onLoad() {
-                (0, _chai.expect)(window.jQuery).to.exist;
-                delete window.$;
-                delete window.jQuery;
+                (0, _chai.expect)(window.bar).to.exist;
+                delete window.bar;
                 done();
             };
             document.body.appendChild(el);

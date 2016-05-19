@@ -159,15 +159,14 @@ describe('dominate - HTML', () => {
     });
 
     it('should load script src', (done) => {
-        const src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+        const src = 'test-file.js';
         const el = dominate(`<script src="${src}"></script>`);
         expect(el.nodeName.toLowerCase()).to.equal('script');
         /* eslint-disable no-unused-expressions */
-        expect(window.jQuery).to.not.exist;
+        expect(window.bar).to.not.exist;
         el.onload = function onLoad() {
-            expect(window.jQuery).to.exist;
-            delete window.$;
-            delete window.jQuery;
+            expect(window.bar).to.exist;
+            delete window.bar;
             done();
         };
         document.body.appendChild(el);
@@ -186,14 +185,13 @@ describe('dominate - HTML', () => {
     });
 
     it('should load embedded script src by default', (done) => {
-        const src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+        const src = 'test-file.js';
         const el = dominate(`<div><script src="${src}"></script></div>`);
         /* eslint-disable no-unused-expressions */
-        expect(window.jQuery).to.not.exist;
+        expect(window.bar).to.not.exist;
         el.firstChild.onload = function onLoad() {
-            expect(window.jQuery).to.exist;
-            delete window.$;
-            delete window.jQuery;
+            expect(window.bar).to.exist;
+            delete window.bar;
             done();
         };
         document.body.appendChild(el);
