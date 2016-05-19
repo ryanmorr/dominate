@@ -99,7 +99,7 @@ function parse(html, tag, doc) {
         return copyAttributes(el, xml);
     }
     // Support <body> and <head> elements
-    if (~('head body').indexOf(tag)) {
+    if (tag === 'head' || tag === 'body') {
         const el = doc.createElement('html');
         el.innerHTML = html;
         return el.removeChild(tag === 'head' ? el.firstChild : el.lastChild);
