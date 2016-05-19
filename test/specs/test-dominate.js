@@ -42,11 +42,6 @@ describe('dominate', () => {
         expect(node.ownerDocument).to.equal(document);
     });
 
-    it('should return a node with no parent node', () => {
-        const el = dominate('<div>foo</div>');
-        expect(el.parentNode).to.equal(null);
-    });
-
     it('should support a document object as an optional second argument', () => {
         const doc = document.implementation.createHTMLDocument('');
         const el = dominate('<div></div>', doc);
@@ -63,11 +58,5 @@ describe('dominate', () => {
         const node = dominate(' some random text  ');
         expect(node.nodeName.toLowerCase()).to.equal('#text');
         expect(node.nodeValue).to.equal(' some random text  ');
-    });
-
-    it('should parse attributes', () => {
-        const el = dominate('<div id="foo" class="bar"></div>');
-        expect(el.id).to.equal('foo');
-        expect(el.className).to.equal('bar');
     });
 });

@@ -8185,7 +8185,7 @@ Library.prototype.test = function(obj, type) {
             return copyAttributes(_el, xml);
         }
         // Support <body> and <head> elements
-        if (~'head body'.indexOf(tag)) {
+        if (tag === 'head' || tag === 'body') {
             var _el2 = doc.createElement('html');
             _el2.innerHTML = html;
             return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
@@ -8302,94 +8302,46 @@ Library.prototype.test = function(obj, type) {
         };
     }
 
+    var toString = {}.toString;
+
+    function isElementSupported(tag) {
+        var el = document.createElement(tag);
+        return toString.call(el) !== '[object HTMLUnknownElement]';
+    }
+
     describe('dominate - HTML', function () {
-        it('should support body elements', function () {
-            var el = (0, _dominate2.default)('<body></body>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('body');
+        var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
+
+        var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
+
+        function testElement(tag, html, htmlWithAttr) {
+            it('should support ' + tag + ' elements', function () {
+                var el = (0, _dominate2.default)(html);
+                (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
+            });
+
+            it('should support ' + tag + ' elements with attributes', function () {
+                var el = (0, _dominate2.default)(htmlWithAttr);
+                (0, _chai.expect)(el.id).to.equal('foo');
+                (0, _chai.expect)(el.className).to.equal('bar');
+            });
+
+            it('should return a ' + tag + ' element with no parent node', function () {
+                var el = (0, _dominate2.default)(html);
+                (0, _chai.expect)(el.parentNode).to.equal(null);
+            });
+        }
+
+        tags.filter(function (tag) {
+            return isElementSupported(tag);
+        }).forEach(function (tag) {
+            testElement(tag, '<' + tag + '></' + tag + '>', '<' + tag + ' id="foo" class="bar"></' + tag + '>');
         });
 
-        it('should support head elements', function () {
-            var el = (0, _dominate2.default)('<head></head>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('head');
-        });
-
-        it('should support html elements', function () {
-            var el = (0, _dominate2.default)('<html></html>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
-        });
-
-        it('should support html elements with attributes', function () {
-            var el = (0, _dominate2.default)('<html id="foo" class="bar"></html>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('html');
-            (0, _chai.expect)(el.id).to.equal('foo');
-            (0, _chai.expect)(el.className).to.equal('bar');
-        });
-
-        it('should support td elements', function () {
-            var el = (0, _dominate2.default)('<td></td>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('td');
-        });
-
-        it('should support tr elements', function () {
-            var el = (0, _dominate2.default)('<tr></tr>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tr');
-        });
-
-        it('should support th elements', function () {
-            var el = (0, _dominate2.default)('<th></th>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('th');
-        });
-
-        it('should support thead elements', function () {
-            var el = (0, _dominate2.default)('<thead></thead>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
-        });
-
-        it('should support tbody elements', function () {
-            var el = (0, _dominate2.default)('<tbody></tbody>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tbody');
-        });
-
-        it('should support thead elements', function () {
-            var el = (0, _dominate2.default)('<thead></thead>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('thead');
-        });
-
-        it('should support tfoot elements', function () {
-            var el = (0, _dominate2.default)('<tfoot></tfoot>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('tfoot');
-        });
-
-        it('should support col elements', function () {
-            var el = (0, _dominate2.default)('<col></col>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('col');
-        });
-
-        it('should support colgroup elements', function () {
-            var el = (0, _dominate2.default)('<colgroup></colgroup>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('colgroup');
-        });
-
-        it('should support caption elements', function () {
-            var el = (0, _dominate2.default)('<caption></caption>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('caption');
-        });
-
-        it('should support legend elements', function () {
-            var el = (0, _dominate2.default)('<legend></legend>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('legend');
-        });
-
-        it('should execute script content', function () {
-            var code = 'window.foo = "foo";';
-            var el = (0, _dominate2.default)('<script>' + code + '</script>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
-            /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.foo).to.not.exist;
-            document.body.appendChild(el);
-            (0, _chai.expect)(window.foo).to.exist;
-            /* eslint-enable no-unused-expressions */
-            delete window.foo;
+        selfCLosingTags.filter(function (tag) {
+            return isElementSupported(tag);
+        }).forEach(function (tag) {
+            testElement(tag, '<' + tag + ' />', '<' + tag + ' id="foo" class="bar" />');
         });
 
         it('should load script src', function (done) {
@@ -8508,11 +8460,6 @@ Library.prototype.test = function(obj, type) {
             (0, _chai.expect)(node.ownerDocument).to.equal(document);
         });
 
-        it('should return a node with no parent node', function () {
-            var el = (0, _dominate2.default)('<div>foo</div>');
-            (0, _chai.expect)(el.parentNode).to.equal(null);
-        });
-
         it('should support a document object as an optional second argument', function () {
             var doc = document.implementation.createHTMLDocument('');
             var el = (0, _dominate2.default)('<div></div>', doc);
@@ -8529,12 +8476,6 @@ Library.prototype.test = function(obj, type) {
             var node = (0, _dominate2.default)(' some random text  ');
             (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
             (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
-        });
-
-        it('should parse attributes', function () {
-            var el = (0, _dominate2.default)('<div id="foo" class="bar"></div>');
-            (0, _chai.expect)(el.id).to.equal('foo');
-            (0, _chai.expect)(el.className).to.equal('bar');
         });
     });
 });
