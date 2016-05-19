@@ -8100,7 +8100,7 @@ Library.prototype.test = function(obj, type) {
 
     // Prevent the parser from ignoring certain
     // elements by wrapping them with the necessary
-    // parent elements to appease XHTML
+    // parent elements to appease XHTML compliance
     // (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
     var wrapMap = {
         thead: [1, '<table>', '</table>'],
@@ -8111,6 +8111,11 @@ Library.prototype.test = function(obj, type) {
     };
     wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
     wrapMap.th = wrapMap.td;
+
+    // Support SVG elements
+    'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach(function (tag) {
+        wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
+    });
 
     /**
      * Copy the attributes from one node
@@ -8283,19 +8288,19 @@ Library.prototype.test = function(obj, type) {
 },{}],42:[function(require,module,exports){
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['./test-dominate.js', './test-dominate-html.js'], factory);
+    define(['./test-dominate.js', './test-dominate-html.js', './test-dominate-svg.js'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(require('./test-dominate.js'), require('./test-dominate-html.js'));
+    factory(require('./test-dominate.js'), require('./test-dominate-html.js'), require('./test-dominate-svg.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(global.testDominate, global.testDominateHtml);
+    factory(global.testDominate, global.testDominateHtml, global.testDominateSvg);
     global.index = mod.exports;
   }
 })(this, function () {});
 
-},{"./test-dominate-html.js":43,"./test-dominate.js":44}],43:[function(require,module,exports){
+},{"./test-dominate-html.js":43,"./test-dominate-svg.js":44,"./test-dominate.js":45}],43:[function(require,module,exports){
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['chai', '../../src/dominate'], factory);
@@ -8326,7 +8331,7 @@ Library.prototype.test = function(obj, type) {
         return toString.call(el) !== '[object HTMLUnknownElement]';
     }
 
-    describe('dominate - HTML', function () {
+    describe('dominate (HTML)', function () {
         var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
 
         var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
@@ -8406,6 +8411,56 @@ Library.prototype.test = function(obj, type) {
 });
 
 },{"../../src/dominate":41,"chai":5}],44:[function(require,module,exports){
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['chai', '../../src/dominate'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(require('chai'), require('../../src/dominate'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(global.chai, global.dominate);
+        global.testDominateSvg = mod.exports;
+    }
+})(this, function (_chai, _dominate) {
+    'use strict';
+
+    var _dominate2 = _interopRequireDefault(_dominate);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    describe('dominate (SVG)', function () {
+        var toString = {}.toString;
+
+        var tags = ['circle', 'ellipse', 'g', 'image', 'line', 'path', 'polygon', 'polyline', 'rect', 'text'];
+
+        tags.forEach(function (tag) {
+            it('should support ' + tag + ' elements', function () {
+                var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
+                (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
+                (0, _chai.expect)(toString.call(el)).to.match(/^\[object SVG\w+Element\]$/);
+            });
+
+            it('should support ' + tag + ' elements with attributes', function () {
+                var el = (0, _dominate2.default)('<' + tag + ' id="foo" class="bar"></' + tag + '>');
+                (0, _chai.expect)(el.getAttribute('id')).to.equal('foo');
+                (0, _chai.expect)(el.getAttribute('class')).to.equal('bar');
+            });
+
+            it('should return a ' + tag + ' element with no parent node', function () {
+                var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
+                (0, _chai.expect)(el.parentNode).to.equal(null);
+            });
+        });
+    });
+});
+
+},{"../../src/dominate":41,"chai":5}],45:[function(require,module,exports){
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['chai', '../../src/dominate'], factory);
