@@ -75,28 +75,16 @@ function parseDocument(markup, type) {
 }
 
 /**
- * Convert a string into a DOM node
+ * Parse an HMTL string in a
+ * DOM node
  *
  * @param {String} html
+ * @param {String} tag
  * @param {Document} doc
- * @return {Element|TextNode|DocumentFragment}
- * @api public
+ * @return {Element|DocumentFragment}
+ * @api private
  */
-export default function dominate(html, doc = document) {
-    // Validate html param
-    if (~~('string boolean number').indexOf(typeof html)) {
-        throw new TypeError('Invalid input, string/number/boolean expected');
-    }
-    // Parse the HTML string for a tag name
-    const match = tagNameRe.exec(html);
-    // If no tag name exists, treat it as plain text
-    if (!match) {
-        return doc.createTextNode(html);
-    }
-    // Get the tag name
-    const tag = match[1].toLowerCase();
-    // Trim the HTML string
-    html = html.trim();
+function parse(html, tag, doc) {
     // Support <html> elements
     if (tag === 'html') {
         if (supportsDOMParser) {
@@ -140,4 +128,46 @@ export default function dominate(html, doc = document) {
         frag.appendChild(el.firstChild);
     }
     return frag;
+}
+
+/**
+ * Convert a string into a DOM node
+ *
+ * @param {String} html
+ * @param {Document} doc
+ * @param {Boolean} execScripts
+ * @return {Element|TextNode|DocumentFragment}
+ * @api public
+ */
+export default function dominate(html, doc = document, execScripts = true) {
+    // Validate html param
+    if (~~('string boolean number').indexOf(typeof html)) {
+        throw new TypeError('Invalid input, string/number/boolean expected');
+    }
+    // Parse the HTML string for a tag name
+    const match = tagNameRe.exec(html);
+    // If no tag name exists, treat it as plain text
+    if (!match) {
+        return doc.createTextNode(html);
+    }
+    // Get the tag name
+    const tag = match[1].toLowerCase();
+    // Get DOM object
+    const el = parse(html.trim(), tag, doc);
+    // Return is script
+    if (tag === 'script') {
+        return el;
+    }
+    // Replace the scripts elements to enable execution
+    const scripts = el.querySelectorAll('script');
+    for (let i = 0, len = scripts.length, script, parent; i < len; i++) {
+        script = scripts[i];
+        parent = script.parentNode;
+        if (execScripts === false) {
+            parent.removeChild(script);
+        } else {
+            parent.replaceChild(copyScript(script, doc), script);
+        }
+    }
+    return el;
 }

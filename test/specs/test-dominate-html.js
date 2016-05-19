@@ -80,7 +80,8 @@ describe('dominate - HTML', () => {
     });
 
     it('should execute script content', () => {
-        const el = dominate('<script>window.foo = "foo";</script>');
+        const code = 'window.foo = "foo";';
+        const el = dominate(`<script>${code}</script>`);
         expect(el.nodeName.toLowerCase()).to.equal('script');
         /* eslint-disable no-unused-expressions */
         expect(window.foo).to.not.exist;
@@ -90,8 +91,9 @@ describe('dominate - HTML', () => {
         delete window.foo;
     });
 
-    it('should load and execute script src', (done) => {
-        const el = dominate('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>');
+    it('should load script src', (done) => {
+        const src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+        const el = dominate(`<script src="${src}"></script>`);
         expect(el.nodeName.toLowerCase()).to.equal('script');
         /* eslint-disable no-unused-expressions */
         expect(window.jQuery).to.not.exist;
@@ -103,5 +105,36 @@ describe('dominate - HTML', () => {
         };
         document.body.appendChild(el);
         /* eslint-enable no-unused-expressions */
+    });
+
+    it('should execute embedded script by default', () => {
+        const code = 'window.foo = "foo";';
+        const el = dominate(`<div><script>${code}</script></div>`);
+        /* eslint-disable no-unused-expressions */
+        expect(window.foo).to.not.exist;
+        document.body.appendChild(el);
+        expect(window.foo).to.exist;
+        /* eslint-enable no-unused-expressions */
+        delete window.foo;
+    });
+
+    it('should load embedded script src by default', (done) => {
+        const src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+        const el = dominate(`<div><script src="${src}"></script></div>`);
+        /* eslint-disable no-unused-expressions */
+        expect(window.jQuery).to.not.exist;
+        el.firstChild.onload = function onLoad() {
+            expect(window.jQuery).to.exist;
+            delete window.$;
+            delete window.jQuery;
+            done();
+        };
+        document.body.appendChild(el);
+        /* eslint-enable no-unused-expressions */
+    });
+
+    it('should remove embedded scripts if provided false as third argument', () => {
+        const el = dominate('<div><script></script></div>', document, false);
+        expect(el.childNodes.length).to.equal(0);
     });
 });

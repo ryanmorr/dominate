@@ -8161,30 +8161,16 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
-     * Convert a string into a DOM node
+     * Parse an HMTL string in a
+     * DOM node
      *
      * @param {String} html
+     * @param {String} tag
      * @param {Document} doc
-     * @return {Element|TextNode|DocumentFragment}
-     * @api public
+     * @return {Element|DocumentFragment}
+     * @api private
      */
-    function dominate(html) {
-        var doc = arguments.length <= 1 || arguments[1] === undefined ? document : arguments[1];
-
-        // Validate html param
-        if (~ ~'string boolean number'.indexOf(typeof html === 'undefined' ? 'undefined' : _typeof(html))) {
-            throw new TypeError('Invalid input, string/number/boolean expected');
-        }
-        // Parse the HTML string for a tag name
-        var match = tagNameRe.exec(html);
-        // If no tag name exists, treat it as plain text
-        if (!match) {
-            return doc.createTextNode(html);
-        }
-        // Get the tag name
-        var tag = match[1].toLowerCase();
-        // Trim the HTML string
-        html = html.trim();
+    function parse(html, tag, doc) {
         // Support <html> elements
         if (tag === 'html') {
             if (supportsDOMParser) {
@@ -8228,6 +8214,51 @@ Library.prototype.test = function(obj, type) {
             frag.appendChild(el.firstChild);
         }
         return frag;
+    }
+
+    /**
+     * Convert a string into a DOM node
+     *
+     * @param {String} html
+     * @param {Document} doc
+     * @param {Boolean} execScripts
+     * @return {Element|TextNode|DocumentFragment}
+     * @api public
+     */
+    function dominate(html) {
+        var doc = arguments.length <= 1 || arguments[1] === undefined ? document : arguments[1];
+        var execScripts = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+        // Validate html param
+        if (~ ~'string boolean number'.indexOf(typeof html === 'undefined' ? 'undefined' : _typeof(html))) {
+            throw new TypeError('Invalid input, string/number/boolean expected');
+        }
+        // Parse the HTML string for a tag name
+        var match = tagNameRe.exec(html);
+        // If no tag name exists, treat it as plain text
+        if (!match) {
+            return doc.createTextNode(html);
+        }
+        // Get the tag name
+        var tag = match[1].toLowerCase();
+        // Get DOM object
+        var el = parse(html.trim(), tag, doc);
+        // Return is script
+        if (tag === 'script') {
+            return el;
+        }
+        // Replace the scripts elements to enable execution
+        var scripts = el.querySelectorAll('script');
+        for (var i = 0, len = scripts.length, script, parent; i < len; i++) {
+            script = scripts[i];
+            parent = script.parentNode;
+            if (execScripts === false) {
+                parent.removeChild(script);
+            } else {
+                parent.replaceChild(copyScript(script, doc), script);
+            }
+        }
+        return el;
     }
     module.exports = exports['default'];
 });
@@ -8350,7 +8381,8 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should execute script content', function () {
-            var el = (0, _dominate2.default)('<script>window.foo = "foo";</script>');
+            var code = 'window.foo = "foo";';
+            var el = (0, _dominate2.default)('<script>' + code + '</script>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
             /* eslint-disable no-unused-expressions */
             (0, _chai.expect)(window.foo).to.not.exist;
@@ -8360,8 +8392,9 @@ Library.prototype.test = function(obj, type) {
             delete window.foo;
         });
 
-        it('should load and execute script src', function (done) {
-            var el = (0, _dominate2.default)('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>');
+        it('should load script src', function (done) {
+            var src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+            var el = (0, _dominate2.default)('<script src="' + src + '"></script>');
             (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
             /* eslint-disable no-unused-expressions */
             (0, _chai.expect)(window.jQuery).to.not.exist;
@@ -8373,6 +8406,37 @@ Library.prototype.test = function(obj, type) {
             };
             document.body.appendChild(el);
             /* eslint-enable no-unused-expressions */
+        });
+
+        it('should execute embedded script by default', function () {
+            var code = 'window.foo = "foo";';
+            var el = (0, _dominate2.default)('<div><script>' + code + '</script></div>');
+            /* eslint-disable no-unused-expressions */
+            (0, _chai.expect)(window.foo).to.not.exist;
+            document.body.appendChild(el);
+            (0, _chai.expect)(window.foo).to.exist;
+            /* eslint-enable no-unused-expressions */
+            delete window.foo;
+        });
+
+        it('should load embedded script src by default', function (done) {
+            var src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js';
+            var el = (0, _dominate2.default)('<div><script src="' + src + '"></script></div>');
+            /* eslint-disable no-unused-expressions */
+            (0, _chai.expect)(window.jQuery).to.not.exist;
+            el.firstChild.onload = function onLoad() {
+                (0, _chai.expect)(window.jQuery).to.exist;
+                delete window.$;
+                delete window.jQuery;
+                done();
+            };
+            document.body.appendChild(el);
+            /* eslint-enable no-unused-expressions */
+        });
+
+        it('should remove embedded scripts if provided false as third argument', function () {
+            var el = (0, _dominate2.default)('<div><script></script></div>', document, false);
+            (0, _chai.expect)(el.childNodes.length).to.equal(0);
         });
     });
 });
