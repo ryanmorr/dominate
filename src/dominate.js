@@ -75,6 +75,22 @@ function parseDocument(markup, type) {
 }
 
 /**
+ * Parse HTML string using the
+ * proper parent element
+ *
+ * @param {Document} doc
+ * @param {String} tag
+ * @param {String} html
+ * @return {Element}
+ * @api private
+ */
+function parseHTML(doc, tag, html) {
+    const el = doc.createElement(tag);
+    el.innerHTML = html;
+    return el;
+}
+
+/**
  * Parse an HMTL string in a
  * DOM node
  *
@@ -93,22 +109,19 @@ function parse(html, tag, doc) {
         // Attributes of the <html> element do not get
         // parsed using `innerHTML` here, so we parse it
         // as XML and then copy the attributes
-        const el = doc.createElement('html');
+        const el = parseHTML(doc, 'html', html);
         const xml = parseDocument(html, 'text/xml');
-        el.innerHTML = html;
         return copyAttributes(el, xml);
     }
     // Support <body> and <head> elements
     if (tag === 'head' || tag === 'body') {
-        const el = doc.createElement('html');
-        el.innerHTML = html;
+        const el = parseHTML(doc, 'html', html);
         return el.removeChild(tag === 'head' ? el.firstChild : el.lastChild);
     }
     // Wrap the element in the appropriate container
     const wrap = wrapMap[tag] || wrapMap.default;
     // Parse HTML string
-    let el = doc.createElement('div');
-    el.innerHTML = wrap[1] + html + wrap[2];
+    let el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
     // Descend through wrappers to get the right element
     let depth = wrap[0];
     while (depth--) {

@@ -8161,6 +8161,22 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
+     * Parse HTML string using the
+     * proper parent element
+     *
+     * @param {Document} doc
+     * @param {String} tag
+     * @param {String} html
+     * @return {Element}
+     * @api private
+     */
+    function parseHTML(doc, tag, html) {
+        var el = doc.createElement(tag);
+        el.innerHTML = html;
+        return el;
+    }
+
+    /**
      * Parse an HMTL string in a
      * DOM node
      *
@@ -8179,22 +8195,19 @@ Library.prototype.test = function(obj, type) {
             // Attributes of the <html> element do not get
             // parsed using `innerHTML` here, so we parse it
             // as XML and then copy the attributes
-            var _el = doc.createElement('html');
+            var _el = parseHTML(doc, 'html', html);
             var xml = parseDocument(html, 'text/xml');
-            _el.innerHTML = html;
             return copyAttributes(_el, xml);
         }
         // Support <body> and <head> elements
         if (tag === 'head' || tag === 'body') {
-            var _el2 = doc.createElement('html');
-            _el2.innerHTML = html;
+            var _el2 = parseHTML(doc, 'html', html);
             return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
         }
         // Wrap the element in the appropriate container
         var wrap = wrapMap[tag] || wrapMap.default;
         // Parse HTML string
-        var el = doc.createElement('div');
-        el.innerHTML = wrap[1] + html + wrap[2];
+        var el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
         // Descend through wrappers to get the right element
         var depth = wrap[0];
         while (depth--) {
