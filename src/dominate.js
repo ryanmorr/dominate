@@ -96,7 +96,7 @@ function parseHTML(doc, tag, html) {
 }
 
 /**
- * Parse an HMTL string in a
+ * Parse an HMTL string into a
  * DOM node
  *
  * @param {Document} doc
@@ -166,7 +166,7 @@ export default function dominate(html, doc = document, execScripts = true) {
     }
     // Get the tag name
     const tag = match[1].toLowerCase();
-    // Get DOM object
+    // Parse the HTML string into a DOM node
     const el = parse(doc, tag, html.trim());
     // If it's a script element, return it as it
     // should always execute regardless of the
