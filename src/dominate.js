@@ -21,7 +21,7 @@ const wrapMap = {
     col: [2, '<table><colgroup>', '</colgroup></table>'],
     tr: [2, '<table><tbody>', '</tbody></table>'],
     td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
-    default: [0, '', '']
+    _default: [0, '', '']
 };
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 wrapMap.th = wrapMap.td;
@@ -124,7 +124,7 @@ function parse(doc, tag, html) {
         return el.removeChild(tag === 'head' ? el.firstChild : el.lastChild);
     }
     // Wrap the element in the appropriate container
-    const wrap = wrapMap[tag] || wrapMap.default;
+    const wrap = wrapMap[tag] || wrapMap._default;
     // Parse HTML string
     let el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
     // Descend through wrappers to get the right element
