@@ -4,13 +4,6 @@ import dominate from '../../src/dominate';
 describe('dominate', () => {
     const toString = {}.toString;
 
-    it('should throw a type error if passed an invalid argument', () => {
-        [null, undefined, {}, [], () => {}, /foo/].forEach((val) => {
-            const fn = () => dominate(val);
-            expect(fn).to.throw(TypeError, 'Invalid input, string/number/boolean expected');
-        });
-    });
-
     it('should convert a single element HTML string into a DOM element', () => {
         const el = dominate('<div>foo</div>');
         expect(el.nodeType).to.equal(1);

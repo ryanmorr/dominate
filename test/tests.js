@@ -8077,13 +8077,6 @@ Library.prototype.test = function(obj, type) {
         value: true
     });
     exports.default = dominate;
-
-    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-        return typeof obj;
-    } : function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
-    };
-
     // Regex to extract the tag name
     var tagNameRe = /<([\w-]+)/;
 
@@ -8139,12 +8132,12 @@ Library.prototype.test = function(obj, type) {
      * Create a script element that will
      * execute
      *
-     * @param {Element} el
      * @param {Document} doc
+     * @param {Element} el
      * @return {Element}
      * @api private
      */
-    function copyScript(el, doc) {
+    function copyScript(doc, el) {
         var script = doc.createElement('script');
         script.async = true;
         script.text = el.textContent;
@@ -8185,13 +8178,13 @@ Library.prototype.test = function(obj, type) {
      * Parse an HMTL string in a
      * DOM node
      *
-     * @param {String} html
-     * @param {String} tag
      * @param {Document} doc
+    * @param {String} tag
+     * @param {String} html
      * @return {Element|DocumentFragment}
      * @api private
      */
-    function parse(html, tag, doc) {
+    function parse(doc, tag, html) {
         // Support <html> elements
         if (tag === 'html') {
             if (supportsDOMParser) {
@@ -8218,9 +8211,9 @@ Library.prototype.test = function(obj, type) {
         while (depth--) {
             el = el.lastChild;
         }
-        // Support <script> elements
+        // Support executable <script> elements
         if (tag === 'script') {
-            return copyScript(el.firstChild, doc);
+            return copyScript(doc, el.firstChild);
         }
         // Single element
         if (el.childNodes.length === 1) {
@@ -8247,10 +8240,6 @@ Library.prototype.test = function(obj, type) {
         var doc = arguments.length <= 1 || arguments[1] === undefined ? document : arguments[1];
         var execScripts = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 
-        // Validate html param
-        if (~ ~'string boolean number'.indexOf(typeof html === 'undefined' ? 'undefined' : _typeof(html))) {
-            throw new TypeError('Invalid input, string/number/boolean expected');
-        }
         // Parse the HTML string for a tag name
         var match = tagNameRe.exec(html);
         // If no tag name exists, treat it as plain text
@@ -8260,7 +8249,7 @@ Library.prototype.test = function(obj, type) {
         // Get the tag name
         var tag = match[1].toLowerCase();
         // Get DOM object
-        var el = parse(html.trim(), tag, doc);
+        var el = parse(doc, tag, html.trim());
         // If it's a script element, return it as it
         // should always execute regardless of the
         // `execScripts` param
@@ -8277,7 +8266,7 @@ Library.prototype.test = function(obj, type) {
             if (execScripts === false) {
                 parent.removeChild(script);
             } else {
-                parent.replaceChild(copyScript(script, doc), script);
+                parent.replaceChild(copyScript(doc, script), script);
             }
         }
         return el;
@@ -8486,15 +8475,6 @@ Library.prototype.test = function(obj, type) {
 
     describe('dominate', function () {
         var toString = {}.toString;
-
-        it('should throw a type error if passed an invalid argument', function () {
-            [null, undefined, {}, [], function () {}, /foo/].forEach(function (val) {
-                var fn = function fn() {
-                    return (0, _dominate2.default)(val);
-                };
-                (0, _chai.expect)(fn).to.throw(TypeError, 'Invalid input, string/number/boolean expected');
-            });
-        });
 
         it('should convert a single element HTML string into a DOM element', function () {
             var el = (0, _dominate2.default)('<div>foo</div>');

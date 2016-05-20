@@ -53,12 +53,12 @@ function copyAttributes(el, target) {
  * Create a script element that will
  * execute
  *
- * @param {Element} el
  * @param {Document} doc
+ * @param {Element} el
  * @return {Element}
  * @api private
  */
-function copyScript(el, doc) {
+function copyScript(doc, el) {
     const script = doc.createElement('script');
     script.async = true;
     script.text = el.textContent;
@@ -99,13 +99,13 @@ function parseHTML(doc, tag, html) {
  * Parse an HMTL string in a
  * DOM node
  *
- * @param {String} html
- * @param {String} tag
  * @param {Document} doc
+* @param {String} tag
+ * @param {String} html
  * @return {Element|DocumentFragment}
  * @api private
  */
-function parse(html, tag, doc) {
+function parse(doc, tag, html) {
     // Support <html> elements
     if (tag === 'html') {
         if (supportsDOMParser) {
@@ -132,9 +132,9 @@ function parse(html, tag, doc) {
     while (depth--) {
         el = el.lastChild;
     }
-    // Support <script> elements
+    // Support executable <script> elements
     if (tag === 'script') {
-        return copyScript(el.firstChild, doc);
+        return copyScript(doc, el.firstChild);
     }
     // Single element
     if (el.childNodes.length === 1) {
@@ -158,10 +158,6 @@ function parse(html, tag, doc) {
  * @api public
  */
 export default function dominate(html, doc = document, execScripts = true) {
-    // Validate html param
-    if (~~('string boolean number').indexOf(typeof html)) {
-        throw new TypeError('Invalid input, string/number/boolean expected');
-    }
     // Parse the HTML string for a tag name
     const match = tagNameRe.exec(html);
     // If no tag name exists, treat it as plain text
@@ -171,7 +167,7 @@ export default function dominate(html, doc = document, execScripts = true) {
     // Get the tag name
     const tag = match[1].toLowerCase();
     // Get DOM object
-    const el = parse(html.trim(), tag, doc);
+    const el = parse(doc, tag, html.trim());
     // If it's a script element, return it as it
     // should always execute regardless of the
     // `execScripts` param
@@ -188,7 +184,7 @@ export default function dominate(html, doc = document, execScripts = true) {
         if (execScripts === false) {
             parent.removeChild(script);
         } else {
-            parent.replaceChild(copyScript(script, doc), script);
+            parent.replaceChild(copyScript(doc, script), script);
         }
     }
     return el;
