@@ -36,9 +36,9 @@ describe('dominate', () => {
     });
 
     it('should support a document object as an optional second argument', () => {
-        const doc = document.implementation.createHTMLDocument('');
-        const el = dominate('<div></div>', doc);
-        expect(el.ownerDocument).to.equal(doc);
+        const context = document.implementation.createHTMLDocument('');
+        const el = dominate('<div></div>', {context});
+        expect(el.ownerDocument).to.equal(context);
     });
 
     it('should ignore leading/trailing whitespace for an HTML string', () => {

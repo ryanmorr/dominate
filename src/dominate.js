@@ -152,22 +152,23 @@ function parse(doc, tag, html) {
  * Convert a string into a DOM node
  *
  * @param {String} html
- * @param {Document} doc
- * @param {Boolean} execScripts
+ * @param {Object} options
+ * @param {Document} options.context
+ * @param {Boolean} options.execScripts
  * @return {Element|TextNode|DocumentFragment}
  * @api public
  */
-export default function dominate(html, doc = document, execScripts = true) {
+export default function dominate(html, {context = document, execScripts = true} = {}) {
     // Parse the HTML string for a tag name
     const match = tagNameRe.exec(html);
     // If no tag name exists, treat it as plain text
     if (!match) {
-        return doc.createTextNode(html);
+        return context.createTextNode(html);
     }
     // Get the tag name
     const tag = match[1].toLowerCase();
     // Parse the HTML string into a DOM node
-    const el = parse(doc, tag, html.trim());
+    const el = parse(context, tag, html.trim());
     // If it's a script element, return it as it
     // should always execute regardless of the
     // `execScripts` param
@@ -184,7 +185,7 @@ export default function dominate(html, doc = document, execScripts = true) {
         if (execScripts === false) {
             parent.removeChild(script);
         } else {
-            parent.replaceChild(copyScript(doc, script), script);
+            parent.replaceChild(copyScript(context, script), script);
         }
     }
     return el;

@@ -8100,7 +8100,7 @@ Library.prototype.test = function(obj, type) {
         col: [2, '<table><colgroup>', '</colgroup></table>'],
         tr: [2, '<table><tbody>', '</tbody></table>'],
         td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
-        default: [0, '', '']
+        _default: [0, '', '']
     };
     wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
     wrapMap.th = wrapMap.td;
@@ -8175,7 +8175,7 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
-     * Parse an HMTL string in a
+     * Parse an HMTL string into a
      * DOM node
      *
      * @param {Document} doc
@@ -8203,7 +8203,7 @@ Library.prototype.test = function(obj, type) {
             return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
         }
         // Wrap the element in the appropriate container
-        var wrap = wrapMap[tag] || wrapMap.default;
+        var wrap = wrapMap[tag] || wrapMap._default;
         // Parse HTML string
         var el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
         // Descend through wrappers to get the right element
@@ -8231,25 +8231,30 @@ Library.prototype.test = function(obj, type) {
      * Convert a string into a DOM node
      *
      * @param {String} html
-     * @param {Document} doc
-     * @param {Boolean} execScripts
+     * @param {Object} options
+     * @param {Document} options.context
+     * @param {Boolean} options.execScripts
      * @return {Element|TextNode|DocumentFragment}
      * @api public
      */
     function dominate(html) {
-        var doc = arguments.length <= 1 || arguments[1] === undefined ? document : arguments[1];
-        var execScripts = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+        var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+        var _ref$context = _ref.context;
+        var context = _ref$context === undefined ? document : _ref$context;
+        var _ref$execScripts = _ref.execScripts;
+        var execScripts = _ref$execScripts === undefined ? true : _ref$execScripts;
 
         // Parse the HTML string for a tag name
         var match = tagNameRe.exec(html);
         // If no tag name exists, treat it as plain text
         if (!match) {
-            return doc.createTextNode(html);
+            return context.createTextNode(html);
         }
         // Get the tag name
         var tag = match[1].toLowerCase();
-        // Get DOM object
-        var el = parse(doc, tag, html.trim());
+        // Parse the HTML string into a DOM node
+        var el = parse(context, tag, html.trim());
         // If it's a script element, return it as it
         // should always execute regardless of the
         // `execScripts` param
@@ -8266,7 +8271,7 @@ Library.prototype.test = function(obj, type) {
             if (execScripts === false) {
                 parent.removeChild(script);
             } else {
-                parent.replaceChild(copyScript(doc, script), script);
+                parent.replaceChild(copyScript(context, script), script);
             }
         }
         return el;
@@ -8393,7 +8398,7 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should remove embedded scripts if provided false as third argument', function () {
-            var el = (0, _dominate2.default)('<div><script></script></div>', document, false);
+            var el = (0, _dominate2.default)('<div><script></script></div>', { execScripts: false });
             (0, _chai.expect)(el.childNodes.length).to.equal(0);
         });
     });
@@ -8508,9 +8513,9 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should support a document object as an optional second argument', function () {
-            var doc = document.implementation.createHTMLDocument('');
-            var el = (0, _dominate2.default)('<div></div>', doc);
-            (0, _chai.expect)(el.ownerDocument).to.equal(doc);
+            var context = document.implementation.createHTMLDocument('');
+            var el = (0, _dominate2.default)('<div></div>', { context: context });
+            (0, _chai.expect)(el.ownerDocument).to.equal(context);
         });
 
         it('should ignore leading/trailing whitespace for an HTML string', function () {
