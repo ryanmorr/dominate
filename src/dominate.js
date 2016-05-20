@@ -32,8 +32,7 @@ wrapMap.th = wrapMap.td;
 });
 
 /**
- * Copy the attributes from one node
- * to another
+ * Copy the attributes from one node to another
  *
  * @param {Element} el
  * @param {Element} target
@@ -50,8 +49,7 @@ function copyAttributes(el, target) {
 }
 
 /**
- * Create a script element that will
- * execute
+ * Create a script element that will execute
  *
  * @param {Document} doc
  * @param {Element} el
@@ -80,8 +78,8 @@ function parseDocument(markup, type) {
 }
 
 /**
- * Parse HTML string using the
- * proper parent element
+ * Parse HTML string using the proper parent
+ * element
  *
  * @param {Document} doc
  * @param {String} tag
@@ -96,11 +94,10 @@ function parseHTML(doc, tag, html) {
 }
 
 /**
- * Parse an HMTL string into a
- * DOM node
+ * Parse an HMTL string into a DOM node
  *
  * @param {Document} doc
-* @param {String} tag
+ * @param {String} tag
  * @param {String} html
  * @return {Element|DocumentFragment}
  * @api private
@@ -154,11 +151,11 @@ function parse(doc, tag, html) {
  * @param {String} html
  * @param {Object} options
  * @param {Document} options.context
- * @param {Boolean} options.execScripts
+ * @param {Boolean} options.scripts
  * @return {Element|TextNode|DocumentFragment}
  * @api public
  */
-export default function dominate(html, {context = document, execScripts = true} = {}) {
+export default function dominate(html, {context = document, scripts = true} = {}) {
     // Parse the HTML string for a tag name
     const match = tagNameRe.exec(html);
     // If no tag name exists, treat it as plain text
@@ -178,11 +175,11 @@ export default function dominate(html, {context = document, execScripts = true} 
     // If `execScripts` is true, replace all script
     // elements with a new script element to enable
     // execution, otherwise remove the script elements
-    const scripts = el.querySelectorAll('script');
-    for (let i = 0, len = scripts.length, script, parent; i < len; i++) {
-        script = scripts[i];
+    const elements = el.querySelectorAll('script');
+    for (let i = 0, len = elements.length, script, parent; i < len; i++) {
+        script = elements[i];
         parent = script.parentNode;
-        if (execScripts === false) {
+        if (scripts === false) {
             parent.removeChild(script);
         } else {
             parent.replaceChild(copyScript(context, script), script);

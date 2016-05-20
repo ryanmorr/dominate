@@ -195,7 +195,7 @@ describe('dominate (HTML)', () => {
     });
 
     it('should remove embedded scripts if provided false as third argument', () => {
-        const el = dominate('<div><script></script></div>', {execScripts: false});
+        const el = dominate('<div><script></script></div>', {scripts: false});
         expect(el.childNodes.length).to.equal(0);
     });
 });

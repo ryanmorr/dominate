@@ -8111,8 +8111,7 @@ Library.prototype.test = function(obj, type) {
     });
 
     /**
-     * Copy the attributes from one node
-     * to another
+     * Copy the attributes from one node to another
      *
      * @param {Element} el
      * @param {Element} target
@@ -8129,8 +8128,7 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
-     * Create a script element that will
-     * execute
+     * Create a script element that will execute
      *
      * @param {Document} doc
      * @param {Element} el
@@ -8159,8 +8157,8 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
-     * Parse HTML string using the
-     * proper parent element
+     * Parse HTML string using the proper parent
+     * element
      *
      * @param {Document} doc
      * @param {String} tag
@@ -8175,11 +8173,10 @@ Library.prototype.test = function(obj, type) {
     }
 
     /**
-     * Parse an HMTL string into a
-     * DOM node
+     * Parse an HMTL string into a DOM node
      *
      * @param {Document} doc
-    * @param {String} tag
+     * @param {String} tag
      * @param {String} html
      * @return {Element|DocumentFragment}
      * @api private
@@ -8233,7 +8230,7 @@ Library.prototype.test = function(obj, type) {
      * @param {String} html
      * @param {Object} options
      * @param {Document} options.context
-     * @param {Boolean} options.execScripts
+     * @param {Boolean} options.scripts
      * @return {Element|TextNode|DocumentFragment}
      * @api public
      */
@@ -8242,8 +8239,8 @@ Library.prototype.test = function(obj, type) {
 
         var _ref$context = _ref.context;
         var context = _ref$context === undefined ? document : _ref$context;
-        var _ref$execScripts = _ref.execScripts;
-        var execScripts = _ref$execScripts === undefined ? true : _ref$execScripts;
+        var _ref$scripts = _ref.scripts;
+        var scripts = _ref$scripts === undefined ? true : _ref$scripts;
 
         // Parse the HTML string for a tag name
         var match = tagNameRe.exec(html);
@@ -8264,11 +8261,11 @@ Library.prototype.test = function(obj, type) {
         // If `execScripts` is true, replace all script
         // elements with a new script element to enable
         // execution, otherwise remove the script elements
-        var scripts = el.querySelectorAll('script');
-        for (var i = 0, len = scripts.length, script, parent; i < len; i++) {
-            script = scripts[i];
+        var elements = el.querySelectorAll('script');
+        for (var i = 0, len = elements.length, script, parent; i < len; i++) {
+            script = elements[i];
             parent = script.parentNode;
-            if (execScripts === false) {
+            if (scripts === false) {
                 parent.removeChild(script);
             } else {
                 parent.replaceChild(copyScript(context, script), script);
@@ -8398,7 +8395,7 @@ Library.prototype.test = function(obj, type) {
         });
 
         it('should remove embedded scripts if provided false as third argument', function () {
-            var el = (0, _dominate2.default)('<div><script></script></div>', { execScripts: false });
+            var el = (0, _dominate2.default)('<div><script></script></div>', { scripts: false });
             (0, _chai.expect)(el.childNodes.length).to.equal(0);
         });
     });
