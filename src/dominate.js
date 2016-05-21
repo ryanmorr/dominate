@@ -157,10 +157,8 @@ function parse(doc, tag, html) {
  * @api public
  */
 export default function dominate(html, {context = document, type = 'html', scripts = true} = {}) {
-    // Return an XML element if the type param is
-    // 'xml' or if the contextual document is not an
-    // HTML document
-    if (type.toLowerCase() === 'xml' || context.documentElement.nodeName !== 'HTML') {
+    // Return an XML element if the type param is 'xml'
+    if (type.toLowerCase() === 'xml') {
         return parseDocument(html, 'text/xml');
     }
     // Parse the HTML string for a tag name

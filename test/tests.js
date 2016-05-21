@@ -8245,10 +8245,8 @@ Library.prototype.test = function(obj, type) {
         var _ref$scripts = _ref.scripts;
         var scripts = _ref$scripts === undefined ? true : _ref$scripts;
 
-        // Return an XML element if the type param is
-        // 'xml' or if the contextual document is not an
-        // HTML document
-        if (type.toLowerCase() === 'xml' || context.documentElement.nodeName !== 'HTML') {
+        // Return an XML element if the type param is 'xml'
+        if (type.toLowerCase() === 'xml') {
             return parseDocument(html, 'text/xml');
         }
         // Parse the HTML string for a tag name
