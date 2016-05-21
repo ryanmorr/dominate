@@ -8230,6 +8230,7 @@ Library.prototype.test = function(obj, type) {
      * @param {String} html
      * @param {Object} options
      * @param {Document} options.context
+     * @param {String} options.type
      * @param {Boolean} options.scripts
      * @return {Element|TextNode|DocumentFragment}
      * @api public
@@ -8239,9 +8240,17 @@ Library.prototype.test = function(obj, type) {
 
         var _ref$context = _ref.context;
         var context = _ref$context === undefined ? document : _ref$context;
+        var _ref$type = _ref.type;
+        var type = _ref$type === undefined ? 'html' : _ref$type;
         var _ref$scripts = _ref.scripts;
         var scripts = _ref$scripts === undefined ? true : _ref$scripts;
 
+        // Return an XML element if the type param is
+        // 'xml' or if the contextual document is not an
+        // HTML document
+        if (type.toLowerCase() === 'xml' || context.documentElement.nodeName !== 'HTML') {
+            return parseDocument(html, 'text/xml');
+        }
         // Parse the HTML string for a tag name
         var match = tagNameRe.exec(html);
         // If no tag name exists, treat it as plain text
@@ -8279,19 +8288,19 @@ Library.prototype.test = function(obj, type) {
 },{}],42:[function(require,module,exports){
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['./test-dominate.js', './test-dominate-html.js', './test-dominate-svg.js'], factory);
+    define(['./test-dominate.js', './test-dominate-html.js', './test-dominate-svg.js', './test-dominate-xml.js'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(require('./test-dominate.js'), require('./test-dominate-html.js'), require('./test-dominate-svg.js'));
+    factory(require('./test-dominate.js'), require('./test-dominate-html.js'), require('./test-dominate-svg.js'), require('./test-dominate-xml.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(global.testDominate, global.testDominateHtml, global.testDominateSvg);
+    factory(global.testDominate, global.testDominateHtml, global.testDominateSvg, global.testDominateXml);
     global.index = mod.exports;
   }
 })(this, function () {});
 
-},{"./test-dominate-html.js":43,"./test-dominate-svg.js":44,"./test-dominate.js":45}],43:[function(require,module,exports){
+},{"./test-dominate-html.js":43,"./test-dominate-svg.js":44,"./test-dominate-xml.js":45,"./test-dominate.js":46}],43:[function(require,module,exports){
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['chai', '../../src/dominate'], factory);
@@ -8322,7 +8331,7 @@ Library.prototype.test = function(obj, type) {
         return toString.call(el) !== '[object HTMLUnknownElement]';
     }
 
-    describe('dominate (HTML)', function () {
+    describe('dominate (HTML5)', function () {
         var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
 
         var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
@@ -8452,6 +8461,53 @@ Library.prototype.test = function(obj, type) {
 });
 
 },{"../../src/dominate":41,"chai":5}],45:[function(require,module,exports){
+(function (global, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(['chai', '../../src/dominate'], factory);
+    } else if (typeof exports !== "undefined") {
+        factory(require('chai'), require('../../src/dominate'));
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(global.chai, global.dominate);
+        global.testDominateXml = mod.exports;
+    }
+})(this, function (_chai, _dominate) {
+    'use strict';
+
+    var _dominate2 = _interopRequireDefault(_dominate);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    describe('dominate (XML)', function () {
+        it('should support XML elements', function () {
+            var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
+            (0, _chai.expect)(el.nodeType).to.equal(1);
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('name');
+            (0, _chai.expect)(el.textContent).to.equal('foo');
+            (0, _chai.expect)(el).to.be.an.instanceof(Element);
+            (0, _chai.expect)(el).to.not.be.an.instanceof(HTMLElement);
+        });
+
+        it('should support XML elements with attributes', function () {
+            var el = (0, _dominate2.default)('<name id="foo" class="bar"></name>', { type: 'xml' });
+            (0, _chai.expect)(el.getAttribute('id')).to.equal('foo');
+            (0, _chai.expect)(el.getAttribute('class')).to.equal('bar');
+        });
+
+        it('should return an XML element with no parent node', function () {
+            var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
+            (0, _chai.expect)(el.parentNode).to.equal(null);
+        });
+    });
+});
+
+},{"../../src/dominate":41,"chai":5}],46:[function(require,module,exports){
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['chai', '../../src/dominate'], factory);

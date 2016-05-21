@@ -151,11 +151,18 @@ function parse(doc, tag, html) {
  * @param {String} html
  * @param {Object} options
  * @param {Document} options.context
+ * @param {String} options.type
  * @param {Boolean} options.scripts
  * @return {Element|TextNode|DocumentFragment}
  * @api public
  */
-export default function dominate(html, {context = document, scripts = true} = {}) {
+export default function dominate(html, {context = document, type = 'html', scripts = true} = {}) {
+    // Return an XML element if the type param is
+    // 'xml' or if the contextual document is not an
+    // HTML document
+    if (type.toLowerCase() === 'xml' || context.documentElement.nodeName !== 'HTML') {
+        return parseDocument(html, 'text/xml');
+    }
     // Parse the HTML string for a tag name
     const match = tagNameRe.exec(html);
     // If no tag name exists, treat it as plain text
