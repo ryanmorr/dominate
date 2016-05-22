@@ -75,8 +75,13 @@ gulp.task('test', ['build:test'], () => {
         .pipe(mocha());
 });
 
+gulp.task('watch', () => {
+    gulp.watch(['./gulpfile.babel.js', config.src.files, config.test.specs], ['lint', 'test']);
+});
+
 gulp.task('default', [
     'lint',
     'test',
-    'build'
+    'build',
+    'watch'
 ]);
