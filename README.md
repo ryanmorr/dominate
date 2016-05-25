@@ -29,7 +29,7 @@ Convert an SVG element into a DOM element:
 
 ``` javascript
 const rect = dominate('<rect x="10" y="10" width="100" height="100"/>');
-console.log(rect.nodeName); // RECT
+console.log(rect instanceof SVGRectElement); // true
 ```
 
 Executes script tags within an HTML string by default:
