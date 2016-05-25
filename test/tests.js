@@ -8081,7 +8081,7 @@ Library.prototype.test = function(obj, type) {
     var tagNameRe = /<([\w-]+)/;
 
     // Determine if `DOMParser` supports 'text/html'
-    var supportsDOMParser = function () {
+    var supportsDOMParserHTML = function () {
         try {
             if (new DOMParser().parseFromString('', 'text/html')) {
                 return true;
@@ -8184,7 +8184,7 @@ Library.prototype.test = function(obj, type) {
     function parse(doc, tag, html) {
         // Support <html> elements
         if (tag === 'html') {
-            if (supportsDOMParser) {
+            if (supportsDOMParserHTML) {
                 return parseDocument(html, 'text/html');
             }
             // Attributes of the <html> element do not get

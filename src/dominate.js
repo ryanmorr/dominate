@@ -2,7 +2,7 @@
 const tagNameRe = /<([\w-]+)/;
 
 // Determine if `DOMParser` supports 'text/html'
-const supportsDOMParser = (() => {
+const supportsDOMParserHTML = (() => {
     try {
         if ((new DOMParser()).parseFromString('', 'text/html')) {
             return true;
@@ -105,7 +105,7 @@ function parseHTML(doc, tag, html) {
 function parse(doc, tag, html) {
     // Support <html> elements
     if (tag === 'html') {
-        if (supportsDOMParser) {
+        if (supportsDOMParserHTML) {
             return parseDocument(html, 'text/html');
         }
         // Attributes of the <html> element do not get
