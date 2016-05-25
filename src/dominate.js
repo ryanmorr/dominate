@@ -173,11 +173,11 @@ export default function dominate(html, {context = document, type = 'html', scrip
     const el = parse(context, tag, html.trim());
     // If it's a script element, return it as it
     // should always execute regardless of the
-    // `execScripts` param
+    // `scripts` param
     if (tag === 'script') {
         return el;
     }
-    // If `execScripts` is true, replace all script
+    // If `scripts` param is true, replace all script
     // elements with a new script element to enable
     // execution, otherwise remove the script elements
     const elements = el.querySelectorAll('script');
