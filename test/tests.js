@@ -8058,528 +8058,454 @@ Library.prototype.test = function(obj, type) {
 };
 
 },{}],41:[function(require,module,exports){
-(function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['module', 'exports'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(module, exports);
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(mod, mod.exports);
-        global.dominate = mod.exports;
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = dominate;
+// Regex to extract the tag name
+var tagNameRe = /<([\w-]+)/;
+
+// Determine if `DOMParser` supports 'text/html'
+var supportsDOMParserHTML = function () {
+    try {
+        if (new DOMParser().parseFromString('', 'text/html')) {
+            return true;
+        }
+    } catch (e) {
+        return false;
     }
-})(this, function (module, exports) {
-    'use strict';
+}();
 
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.default = dominate;
-    // Regex to extract the tag name
-    var tagNameRe = /<([\w-]+)/;
+// Prevent the parser from ignoring certain
+// elements by wrapping them with the necessary
+// parent elements to appease XHTML compliance
+// (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
+var wrapMap = {
+    thead: [1, '<table>', '</table>'],
+    col: [2, '<table><colgroup>', '</colgroup></table>'],
+    tr: [2, '<table><tbody>', '</tbody></table>'],
+    td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
+    _default: [0, '', '']
+};
+wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
+wrapMap.th = wrapMap.td;
 
-    // Determine if `DOMParser` supports 'text/html'
-    var supportsDOMParserHTML = function () {
-        try {
-            if (new DOMParser().parseFromString('', 'text/html')) {
-                return true;
-            }
-        } catch (e) {
-            return false;
-        }
-    }();
-
-    // Prevent the parser from ignoring certain
-    // elements by wrapping them with the necessary
-    // parent elements to appease XHTML compliance
-    // (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
-    var wrapMap = {
-        thead: [1, '<table>', '</table>'],
-        col: [2, '<table><colgroup>', '</colgroup></table>'],
-        tr: [2, '<table><tbody>', '</tbody></table>'],
-        td: [3, '<table><tbody><tr>', '</tr></tbody></table>'],
-        _default: [0, '', '']
-    };
-    wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
-    wrapMap.th = wrapMap.td;
-
-    // Support SVG elements
-    'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach(function (tag) {
-        wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
-    });
-
-    /**
-     * Copy the attributes from one node to another
-     *
-     * @param {Element} el
-     * @param {Element} target
-     * @return {Element}
-     * @api private
-     */
-    function copyAttributes(el, target) {
-        var attrs = target.attributes;
-        for (var i = 0, len = attrs.length, attr; i < len; i++) {
-            attr = attrs[i];
-            el.setAttribute(attr.name, attr.value);
-        }
-        return el;
-    }
-
-    /**
-     * Create a script element that will execute
-     *
-     * @param {Document} doc
-     * @param {Element} el
-     * @return {Element}
-     * @api private
-     */
-    function copyScript(doc, el) {
-        var script = doc.createElement('script');
-        script.async = true;
-        script.text = el.textContent;
-        return copyAttributes(script, el);
-    }
-
-    /**
-     * Parse HTML and XML documents
-     *
-     * @param {String} markup
-     * @param {String} type
-     * @return {Element}
-     * @api private
-     */
-    function parseDocument(markup, type) {
-        var parser = new DOMParser();
-        var newDoc = parser.parseFromString(markup, type);
-        return newDoc.removeChild(newDoc.documentElement);
-    }
-
-    /**
-     * Parse HTML string using the proper parent
-     * element
-     *
-     * @param {Document} doc
-     * @param {String} tag
-     * @param {String} html
-     * @return {Element}
-     * @api private
-     */
-    function parseHTML(doc, tag, html) {
-        var el = doc.createElement(tag);
-        el.innerHTML = html;
-        return el;
-    }
-
-    /**
-     * Parse an HMTL string into a DOM node
-     *
-     * @param {Document} doc
-     * @param {String} tag
-     * @param {String} html
-     * @return {Element|DocumentFragment}
-     * @api private
-     */
-    function parse(doc, tag, html) {
-        // Support <html> elements
-        if (tag === 'html') {
-            if (supportsDOMParserHTML) {
-                return parseDocument(html, 'text/html');
-            }
-            // Attributes of the <html> element do not get
-            // parsed using `innerHTML` here, so we parse it
-            // as XML and then copy the attributes
-            var _el = parseHTML(doc, 'html', html);
-            var xml = parseDocument(html, 'text/xml');
-            return copyAttributes(_el, xml);
-        }
-        // Support <body> and <head> elements
-        if (tag === 'head' || tag === 'body') {
-            var _el2 = parseHTML(doc, 'html', html);
-            return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
-        }
-        // Wrap the element in the appropriate container
-        var wrap = wrapMap[tag] || wrapMap._default;
-        // Parse HTML string
-        var el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
-        // Descend through wrappers to get the right element
-        var depth = wrap[0];
-        while (depth--) {
-            el = el.lastChild;
-        }
-        // Support executable <script> elements
-        if (tag === 'script') {
-            return copyScript(doc, el.firstChild);
-        }
-        // Single element
-        if (el.childNodes.length === 1) {
-            return el.removeChild(el.firstChild);
-        }
-        // Use a document fragment for multiple elements
-        var frag = doc.createDocumentFragment();
-        while (el.firstChild) {
-            frag.appendChild(el.firstChild);
-        }
-        return frag;
-    }
-
-    /**
-     * Convert a string into a DOM node
-     *
-     * @param {String} html
-     * @param {Object} options
-     * @param {Document} options.context
-     * @param {String} options.type
-     * @param {Boolean} options.scripts
-     * @return {Element|TextNode|DocumentFragment}
-     * @api public
-     */
-    function dominate(html) {
-        var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-        var _ref$context = _ref.context;
-        var context = _ref$context === undefined ? document : _ref$context;
-        var _ref$type = _ref.type;
-        var type = _ref$type === undefined ? 'html' : _ref$type;
-        var _ref$scripts = _ref.scripts;
-        var scripts = _ref$scripts === undefined ? true : _ref$scripts;
-
-        // Return an XML element if the type param is 'xml'
-        if (type.toLowerCase() === 'xml') {
-            return parseDocument(html, 'text/xml');
-        }
-        // Parse the HTML string for a tag name
-        var match = tagNameRe.exec(html);
-        // If no tag name exists, treat it as plain text
-        if (!match) {
-            return context.createTextNode(html);
-        }
-        // Get the tag name
-        var tag = match[1].toLowerCase();
-        // Parse the HTML string into a DOM node
-        var el = parse(context, tag, html.trim());
-        // If it's a script element, return it as it
-        // should always execute regardless of the
-        // `execScripts` param
-        if (tag === 'script') {
-            return el;
-        }
-        // If `execScripts` is true, replace all script
-        // elements with a new script element to enable
-        // execution, otherwise remove the script elements
-        var elements = el.querySelectorAll('script');
-        for (var i = 0, len = elements.length, script, parent; i < len; i++) {
-            script = elements[i];
-            parent = script.parentNode;
-            if (scripts === false) {
-                parent.removeChild(script);
-            } else {
-                parent.replaceChild(copyScript(context, script), script);
-            }
-        }
-        return el;
-    }
-    module.exports = exports['default'];
+// Support SVG elements
+'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach(function (tag) {
+    wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
 });
 
+/**
+ * Copy the attributes from one node to another
+ *
+ * @param {Element} el
+ * @param {Element} target
+ * @return {Element}
+ * @api private
+ */
+function copyAttributes(el, target) {
+    var attrs = target.attributes;
+    for (var i = 0, len = attrs.length, attr; i < len; i++) {
+        attr = attrs[i];
+        el.setAttribute(attr.name, attr.value);
+    }
+    return el;
+}
+
+/**
+ * Create a script element that will execute
+ *
+ * @param {Document} doc
+ * @param {Element} el
+ * @return {Element}
+ * @api private
+ */
+function copyScript(doc, el) {
+    var script = doc.createElement('script');
+    script.async = true;
+    script.text = el.textContent;
+    return copyAttributes(script, el);
+}
+
+/**
+ * Parse HTML and XML documents
+ *
+ * @param {String} markup
+ * @param {String} type
+ * @return {Element}
+ * @api private
+ */
+function parseDocument(markup, type) {
+    var parser = new DOMParser();
+    var newDoc = parser.parseFromString(markup, type);
+    return newDoc.removeChild(newDoc.documentElement);
+}
+
+/**
+ * Parse HTML string using the proper parent
+ * element
+ *
+ * @param {Document} doc
+ * @param {String} tag
+ * @param {String} html
+ * @return {Element}
+ * @api private
+ */
+function parseHTML(doc, tag, html) {
+    var el = doc.createElement(tag);
+    el.innerHTML = html;
+    return el;
+}
+
+/**
+ * Parse an HMTL string into a DOM node
+ *
+ * @param {Document} doc
+ * @param {String} tag
+ * @param {String} html
+ * @return {Element|DocumentFragment}
+ * @api private
+ */
+function parse(doc, tag, html) {
+    // Support <html> elements
+    if (tag === 'html') {
+        if (supportsDOMParserHTML) {
+            return parseDocument(html, 'text/html');
+        }
+        // Attributes of the <html> element do not get
+        // parsed using `innerHTML` here, so we parse it
+        // as XML and then copy the attributes
+        var _el = parseHTML(doc, 'html', html);
+        var xml = parseDocument(html, 'text/xml');
+        return copyAttributes(_el, xml);
+    }
+    // Support <body> and <head> elements
+    if (tag === 'head' || tag === 'body') {
+        var _el2 = parseHTML(doc, 'html', html);
+        return _el2.removeChild(tag === 'head' ? _el2.firstChild : _el2.lastChild);
+    }
+    // Wrap the element in the appropriate container
+    var wrap = wrapMap[tag] || wrapMap._default;
+    // Parse HTML string
+    var el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
+    // Descend through wrappers to get the right element
+    var depth = wrap[0];
+    while (depth--) {
+        el = el.lastChild;
+    }
+    // Support executable <script> elements
+    if (tag === 'script') {
+        return copyScript(doc, el.firstChild);
+    }
+    // Single element
+    if (el.childNodes.length === 1) {
+        return el.removeChild(el.firstChild);
+    }
+    // Use a document fragment for multiple elements
+    var frag = doc.createDocumentFragment();
+    while (el.firstChild) {
+        frag.appendChild(el.firstChild);
+    }
+    return frag;
+}
+
+/**
+ * Convert a string into a DOM node
+ *
+ * @param {String} html
+ * @param {Object} options
+ * @param {Document} options.context
+ * @param {String} options.type
+ * @param {Boolean} options.scripts
+ * @return {Element|TextNode|DocumentFragment}
+ * @api public
+ */
+function dominate(html) {
+    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var _ref$context = _ref.context;
+    var context = _ref$context === undefined ? document : _ref$context;
+    var _ref$type = _ref.type;
+    var type = _ref$type === undefined ? 'html' : _ref$type;
+    var _ref$scripts = _ref.scripts;
+    var scripts = _ref$scripts === undefined ? true : _ref$scripts;
+
+    // Return an XML element if the type param is 'xml'
+    if (type.toLowerCase() === 'xml') {
+        return parseDocument(html, 'text/xml');
+    }
+    // Parse the HTML string for a tag name
+    var match = tagNameRe.exec(html);
+    // If no tag name exists, treat it as plain text
+    if (!match) {
+        return context.createTextNode(html);
+    }
+    // Get the tag name
+    var tag = match[1].toLowerCase();
+    // Parse the HTML string into a DOM node
+    var el = parse(context, tag, html.trim());
+    // If it's a script element, return it as it
+    // should always execute regardless of the
+    // `scripts` param
+    if (tag === 'script') {
+        return el;
+    }
+    // If `scripts` param is true, replace all script
+    // elements with a new script element to enable
+    // execution, otherwise remove the script elements
+    var elements = el.querySelectorAll('script');
+    for (var i = 0, len = elements.length, script, parent; i < len; i++) {
+        script = elements[i];
+        parent = script.parentNode;
+        if (scripts === false) {
+            parent.removeChild(script);
+        } else {
+            parent.replaceChild(copyScript(context, script), script);
+        }
+    }
+    return el;
+}
+module.exports = exports['default'];
+
 },{}],42:[function(require,module,exports){
-(function (global, factory) {
-  if (typeof define === "function" && define.amd) {
-    define(['./test-dominate.js', './test-dominate-html.js', './test-dominate-svg.js', './test-dominate-xml.js'], factory);
-  } else if (typeof exports !== "undefined") {
-    factory(require('./test-dominate.js'), require('./test-dominate-html.js'), require('./test-dominate-svg.js'), require('./test-dominate-xml.js'));
-  } else {
-    var mod = {
-      exports: {}
-    };
-    factory(global.testDominate, global.testDominateHtml, global.testDominateSvg, global.testDominateXml);
-    global.index = mod.exports;
-  }
-})(this, function () {});
+'use strict';
+
+require('./test-dominate.js');
+
+require('./test-dominate-html.js');
+
+require('./test-dominate-svg.js');
+
+require('./test-dominate-xml.js');
 
 },{"./test-dominate-html.js":43,"./test-dominate-svg.js":44,"./test-dominate-xml.js":45,"./test-dominate.js":46}],43:[function(require,module,exports){
-(function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['chai', '../../src/dominate'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(require('chai'), require('../../src/dominate'));
-    } else {
-        var mod = {
-            exports: {}
+'use strict';
+
+var _chai = require('chai');
+
+var _dominate = require('../../src/dominate');
+
+var _dominate2 = _interopRequireDefault(_dominate);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var toString = {}.toString;
+
+function isElementSupported(tag) {
+    var el = document.createElement(tag);
+    return toString.call(el) !== '[object HTMLUnknownElement]';
+}
+
+describe('dominate (HTML5)', function () {
+    var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
+
+    var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
+
+    function testElement(tag, html, htmlWithAttr) {
+        it('should support ' + tag + ' elements', function () {
+            var el = (0, _dominate2.default)(html);
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
+        });
+
+        it('should support ' + tag + ' elements with attributes', function () {
+            var el = (0, _dominate2.default)(htmlWithAttr);
+            (0, _chai.expect)(el.id).to.equal('foo');
+            (0, _chai.expect)(el.className).to.equal('bar');
+        });
+
+        it('should return a ' + tag + ' element with no parent node', function () {
+            var el = (0, _dominate2.default)(html);
+            (0, _chai.expect)(el.parentNode).to.equal(null);
+        });
+    }
+
+    tags.filter(function (tag) {
+        return isElementSupported(tag);
+    }).forEach(function (tag) {
+        testElement(tag, '<' + tag + '></' + tag + '>', '<' + tag + ' id="foo" class="bar"></' + tag + '>');
+    });
+
+    selfCLosingTags.filter(function (tag) {
+        return isElementSupported(tag);
+    }).forEach(function (tag) {
+        testElement(tag, '<' + tag + ' />', '<' + tag + ' id="foo" class="bar" />');
+    });
+
+    it('should load script src', function (done) {
+        var el = (0, _dominate2.default)('<script src="test-file.js"></script>');
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
+        /* eslint-disable no-unused-expressions */
+        (0, _chai.expect)(window.bar).to.not.exist;
+        el.onload = function onLoad() {
+            (0, _chai.expect)(window.bar).to.exist;
+            delete window.bar;
+            done();
         };
-        factory(global.chai, global.dominate);
-        global.testDominateHtml = mod.exports;
-    }
-})(this, function (_chai, _dominate) {
-    'use strict';
+        document.body.appendChild(el);
+        /* eslint-enable no-unused-expressions */
+    });
 
-    var _dominate2 = _interopRequireDefault(_dominate);
+    it('should execute embedded script by default', function () {
+        var el = (0, _dominate2.default)('<div><script>window.foo = "foo";</script></div>');
+        /* eslint-disable no-unused-expressions */
+        (0, _chai.expect)(window.foo).to.not.exist;
+        document.body.appendChild(el);
+        (0, _chai.expect)(window.foo).to.exist;
+        /* eslint-enable no-unused-expressions */
+        delete window.foo;
+    });
 
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
+    it('should load embedded script src by default', function (done) {
+        var el = (0, _dominate2.default)('<div><script src="test-file.js"></script></div>');
+        /* eslint-disable no-unused-expressions */
+        (0, _chai.expect)(window.bar).to.not.exist;
+        el.firstChild.onload = function onLoad() {
+            (0, _chai.expect)(window.bar).to.exist;
+            delete window.bar;
+            done();
         };
-    }
+        document.body.appendChild(el);
+        /* eslint-enable no-unused-expressions */
+    });
 
-    var toString = {}.toString;
-
-    function isElementSupported(tag) {
-        var el = document.createElement(tag);
-        return toString.call(el) !== '[object HTMLUnknownElement]';
-    }
-
-    describe('dominate (HTML5)', function () {
-        var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
-
-        var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
-
-        function testElement(tag, html, htmlWithAttr) {
-            it('should support ' + tag + ' elements', function () {
-                var el = (0, _dominate2.default)(html);
-                (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
-            });
-
-            it('should support ' + tag + ' elements with attributes', function () {
-                var el = (0, _dominate2.default)(htmlWithAttr);
-                (0, _chai.expect)(el.id).to.equal('foo');
-                (0, _chai.expect)(el.className).to.equal('bar');
-            });
-
-            it('should return a ' + tag + ' element with no parent node', function () {
-                var el = (0, _dominate2.default)(html);
-                (0, _chai.expect)(el.parentNode).to.equal(null);
-            });
-        }
-
-        tags.filter(function (tag) {
-            return isElementSupported(tag);
-        }).forEach(function (tag) {
-            testElement(tag, '<' + tag + '></' + tag + '>', '<' + tag + ' id="foo" class="bar"></' + tag + '>');
-        });
-
-        selfCLosingTags.filter(function (tag) {
-            return isElementSupported(tag);
-        }).forEach(function (tag) {
-            testElement(tag, '<' + tag + ' />', '<' + tag + ' id="foo" class="bar" />');
-        });
-
-        it('should load script src', function (done) {
-            var el = (0, _dominate2.default)('<script src="test-file.js"></script>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
-            /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.bar).to.not.exist;
-            el.onload = function onLoad() {
-                (0, _chai.expect)(window.bar).to.exist;
-                delete window.bar;
-                done();
-            };
-            document.body.appendChild(el);
-            /* eslint-enable no-unused-expressions */
-        });
-
-        it('should execute embedded script by default', function () {
-            var el = (0, _dominate2.default)('<div><script>window.foo = "foo";</script></div>');
-            /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.foo).to.not.exist;
-            document.body.appendChild(el);
-            (0, _chai.expect)(window.foo).to.exist;
-            /* eslint-enable no-unused-expressions */
-            delete window.foo;
-        });
-
-        it('should load embedded script src by default', function (done) {
-            var el = (0, _dominate2.default)('<div><script src="test-file.js"></script></div>');
-            /* eslint-disable no-unused-expressions */
-            (0, _chai.expect)(window.bar).to.not.exist;
-            el.firstChild.onload = function onLoad() {
-                (0, _chai.expect)(window.bar).to.exist;
-                delete window.bar;
-                done();
-            };
-            document.body.appendChild(el);
-            /* eslint-enable no-unused-expressions */
-        });
-
-        it('should remove embedded scripts if provided false as third argument', function () {
-            var el = (0, _dominate2.default)('<div><script></script></div>', { scripts: false });
-            (0, _chai.expect)(el.childNodes.length).to.equal(0);
-        });
+    it('should remove embedded scripts if provided false as third argument', function () {
+        var el = (0, _dominate2.default)('<div><script></script></div>', { scripts: false });
+        (0, _chai.expect)(el.childNodes.length).to.equal(0);
     });
 });
 
 },{"../../src/dominate":41,"chai":5}],44:[function(require,module,exports){
-(function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['chai', '../../src/dominate'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(require('chai'), require('../../src/dominate'));
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(global.chai, global.dominate);
-        global.testDominateSvg = mod.exports;
-    }
-})(this, function (_chai, _dominate) {
-    'use strict';
+'use strict';
 
-    var _dominate2 = _interopRequireDefault(_dominate);
+var _chai = require('chai');
 
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
+var _dominate = require('../../src/dominate');
 
-    describe('dominate (SVG)', function () {
-        var toString = {}.toString;
+var _dominate2 = _interopRequireDefault(_dominate);
 
-        var tags = ['circle', 'ellipse', 'g', 'image', 'line', 'path', 'polygon', 'polyline', 'rect', 'text'];
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-        tags.forEach(function (tag) {
-            it('should support ' + tag + ' elements', function () {
-                var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
-                (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
-                (0, _chai.expect)(toString.call(el)).to.match(/^\[object SVG\w+Element\]$/);
-            });
+describe('dominate (SVG)', function () {
+    var toString = {}.toString;
 
-            it('should support ' + tag + ' elements with attributes', function () {
-                var el = (0, _dominate2.default)('<' + tag + ' id="foo" class="bar"></' + tag + '>');
-                (0, _chai.expect)(el.getAttribute('id')).to.equal('foo');
-                (0, _chai.expect)(el.getAttribute('class')).to.equal('bar');
-            });
+    var tags = ['circle', 'ellipse', 'g', 'image', 'line', 'path', 'polygon', 'polyline', 'rect', 'text'];
 
-            it('should return a ' + tag + ' element with no parent node', function () {
-                var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
-                (0, _chai.expect)(el.parentNode).to.equal(null);
-            });
-        });
-    });
-});
-
-},{"../../src/dominate":41,"chai":5}],45:[function(require,module,exports){
-(function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['chai', '../../src/dominate'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(require('chai'), require('../../src/dominate'));
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(global.chai, global.dominate);
-        global.testDominateXml = mod.exports;
-    }
-})(this, function (_chai, _dominate) {
-    'use strict';
-
-    var _dominate2 = _interopRequireDefault(_dominate);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
-
-    describe('dominate (XML)', function () {
-        it('should support XML elements', function () {
-            var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
-            (0, _chai.expect)(el.nodeType).to.equal(1);
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('name');
-            (0, _chai.expect)(el.textContent).to.equal('foo');
-            (0, _chai.expect)(el).to.be.an.instanceof(Element);
-            (0, _chai.expect)(el).to.not.be.an.instanceof(HTMLElement);
+    tags.forEach(function (tag) {
+        it('should support ' + tag + ' elements', function () {
+            var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
+            (0, _chai.expect)(toString.call(el)).to.match(/^\[object SVG\w+Element\]$/);
         });
 
-        it('should support XML elements with attributes', function () {
-            var el = (0, _dominate2.default)('<name id="foo" class="bar"></name>', { type: 'xml' });
+        it('should support ' + tag + ' elements with attributes', function () {
+            var el = (0, _dominate2.default)('<' + tag + ' id="foo" class="bar"></' + tag + '>');
             (0, _chai.expect)(el.getAttribute('id')).to.equal('foo');
             (0, _chai.expect)(el.getAttribute('class')).to.equal('bar');
         });
 
-        it('should return an XML element with no parent node', function () {
-            var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
+        it('should return a ' + tag + ' element with no parent node', function () {
+            var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
             (0, _chai.expect)(el.parentNode).to.equal(null);
         });
     });
 });
 
+},{"../../src/dominate":41,"chai":5}],45:[function(require,module,exports){
+'use strict';
+
+var _chai = require('chai');
+
+var _dominate = require('../../src/dominate');
+
+var _dominate2 = _interopRequireDefault(_dominate);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('dominate (XML)', function () {
+    it('should support XML elements', function () {
+        var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
+        (0, _chai.expect)(el.nodeType).to.equal(1);
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('name');
+        (0, _chai.expect)(el.textContent).to.equal('foo');
+        (0, _chai.expect)(el).to.be.an.instanceof(Element);
+        (0, _chai.expect)(el).to.not.be.an.instanceof(HTMLElement);
+    });
+
+    it('should support XML elements with attributes', function () {
+        var el = (0, _dominate2.default)('<name id="foo" class="bar"></name>', { type: 'xml' });
+        (0, _chai.expect)(el.getAttribute('id')).to.equal('foo');
+        (0, _chai.expect)(el.getAttribute('class')).to.equal('bar');
+    });
+
+    it('should return an XML element with no parent node', function () {
+        var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
+        (0, _chai.expect)(el.parentNode).to.equal(null);
+    });
+});
+
 },{"../../src/dominate":41,"chai":5}],46:[function(require,module,exports){
-(function (global, factory) {
-    if (typeof define === "function" && define.amd) {
-        define(['chai', '../../src/dominate'], factory);
-    } else if (typeof exports !== "undefined") {
-        factory(require('chai'), require('../../src/dominate'));
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(global.chai, global.dominate);
-        global.testDominate = mod.exports;
-    }
-})(this, function (_chai, _dominate) {
-    'use strict';
+'use strict';
 
-    var _dominate2 = _interopRequireDefault(_dominate);
+var _chai = require('chai');
 
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
+var _dominate = require('../../src/dominate');
 
-    describe('dominate', function () {
-        var toString = {}.toString;
+var _dominate2 = _interopRequireDefault(_dominate);
 
-        it('should convert a single element HTML string into a DOM element', function () {
-            var el = (0, _dominate2.default)('<div>foo</div>');
-            (0, _chai.expect)(el.nodeType).to.equal(1);
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
-            (0, _chai.expect)(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
-            (0, _chai.expect)(el.textContent).to.equal('foo');
-            (0, _chai.expect)(el.ownerDocument).to.equal(document);
-        });
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-        it('should convert a multiple element HTML string into a DOM fragment', function () {
-            var frag = (0, _dominate2.default)('<div>foo</div><span>bar</span><em>baz</em>');
-            (0, _chai.expect)(frag.nodeType).to.equal(11);
-            (0, _chai.expect)(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
-            (0, _chai.expect)(toString.call(frag)).to.equal('[object DocumentFragment]');
-            (0, _chai.expect)(frag.querySelectorAll('*')).to.have.lengthOf(3);
-            (0, _chai.expect)(frag.querySelectorAll('div')).to.have.lengthOf(1);
-            (0, _chai.expect)(frag.querySelectorAll('span')).to.have.lengthOf(1);
-            (0, _chai.expect)(frag.querySelectorAll('em')).to.have.lengthOf(1);
-            (0, _chai.expect)(frag.textContent).to.equal('foobarbaz');
-            (0, _chai.expect)(frag.ownerDocument).to.equal(document);
-        });
+describe('dominate', function () {
+    var toString = {}.toString;
 
-        it('should convert plain text to a DOM text node', function () {
-            var node = (0, _dominate2.default)('foo');
-            (0, _chai.expect)(node.nodeType).to.equal(3);
-            (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
-            (0, _chai.expect)(toString.call(node)).to.equal('[object Text]');
-            (0, _chai.expect)(node.nodeValue).to.equal('foo');
-            (0, _chai.expect)(node.ownerDocument).to.equal(document);
-        });
+    it('should convert a single element HTML string into a DOM element', function () {
+        var el = (0, _dominate2.default)('<div>foo</div>');
+        (0, _chai.expect)(el.nodeType).to.equal(1);
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
+        (0, _chai.expect)(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
+        (0, _chai.expect)(el.textContent).to.equal('foo');
+        (0, _chai.expect)(el.ownerDocument).to.equal(document);
+    });
 
-        it('should support a document object as an optional second argument', function () {
-            var context = document.implementation.createHTMLDocument('');
-            var el = (0, _dominate2.default)('<div></div>', { context: context });
-            (0, _chai.expect)(el.ownerDocument).to.equal(context);
-        });
+    it('should convert a multiple element HTML string into a DOM fragment', function () {
+        var frag = (0, _dominate2.default)('<div>foo</div><span>bar</span><em>baz</em>');
+        (0, _chai.expect)(frag.nodeType).to.equal(11);
+        (0, _chai.expect)(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
+        (0, _chai.expect)(toString.call(frag)).to.equal('[object DocumentFragment]');
+        (0, _chai.expect)(frag.querySelectorAll('*')).to.have.lengthOf(3);
+        (0, _chai.expect)(frag.querySelectorAll('div')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.querySelectorAll('span')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.querySelectorAll('em')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.textContent).to.equal('foobarbaz');
+        (0, _chai.expect)(frag.ownerDocument).to.equal(document);
+    });
 
-        it('should ignore leading/trailing whitespace for an HTML string', function () {
-            var el = (0, _dominate2.default)(' <i>foo</i> ');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('i');
-            (0, _chai.expect)(el.textContent).to.equal('foo');
-        });
+    it('should convert plain text to a DOM text node', function () {
+        var node = (0, _dominate2.default)('foo');
+        (0, _chai.expect)(node.nodeType).to.equal(3);
+        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
+        (0, _chai.expect)(toString.call(node)).to.equal('[object Text]');
+        (0, _chai.expect)(node.nodeValue).to.equal('foo');
+        (0, _chai.expect)(node.ownerDocument).to.equal(document);
+    });
 
-        it('should preserve leading/trailing whitespace for plain text', function () {
-            var node = (0, _dominate2.default)(' some random text  ');
-            (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
-            (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
-        });
+    it('should support a document object as an optional second argument', function () {
+        var context = document.implementation.createHTMLDocument('');
+        var el = (0, _dominate2.default)('<div></div>', { context: context });
+        (0, _chai.expect)(el.ownerDocument).to.equal(context);
+    });
+
+    it('should ignore leading/trailing whitespace for an HTML string', function () {
+        var el = (0, _dominate2.default)(' <i>foo</i> ');
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('i');
+        (0, _chai.expect)(el.textContent).to.equal('foo');
+    });
+
+    it('should preserve leading/trailing whitespace for plain text', function () {
+        var node = (0, _dominate2.default)(' some random text  ');
+        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
+        (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
     });
 });
 

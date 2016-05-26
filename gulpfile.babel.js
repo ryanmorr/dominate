@@ -39,7 +39,7 @@ gulp.task('clean:test', () => {
 });
 
 gulp.task('build', ['clean'], () => {
-    return browserify(config.src.entryFile, {debug: true})
+    return browserify(config.src.entryFile, {debug: true, standalone: pkg.name})
         .transform(babelify)
         .bundle()
         .pipe(source(config.src.outputFile))
