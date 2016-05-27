@@ -44,13 +44,13 @@ gulp.task('build', ['clean'], () => {
         .bundle()
         .pipe(source(config.src.outputFile))
         .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(header(banner, {pkg}))
         .pipe(gulp.dest(config.src.outputDir))
-        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify())
-        .pipe(sourcemaps.write('./'))
         .pipe(rename({suffix: '.min'}))
         .pipe(header(banner, {pkg}))
+        .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest(config.src.outputDir));
 });
 
