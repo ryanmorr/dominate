@@ -1,4 +1,5 @@
-# dominate [![Build Status](https://travis-ci.org/ryanmorr/dominate.svg)](https://travis-ci.org/ryanmorr/dominate)
+# dominate 
+[![GitHub version](https://badge.fury.io/gh/ryanmorr%2Fdominate.svg)](https://badge.fury.io/gh/ryanmorr%2Fdominate) [![Build Status](https://travis-ci.org/ryanmorr/dominate.svg)](https://travis-ci.org/ryanmorr/dominate) ![Size](https://badge-size.herokuapp.com/ryanmorr/dominate/master/dist/dominate.min.js.svg?color=blue&label=file%20size)
 
 > Convert HTML, SVG, and XML markup strings into DOM objects.
 
