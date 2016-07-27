@@ -35,7 +35,7 @@ describe('dominate', () => {
         expect(node.ownerDocument).to.equal(document);
     });
 
-    it('should support a document object as an optional second argument', () => {
+    it('should support a document object provided via the `context` option', () => {
         const context = document.implementation.createHTMLDocument('');
         const el = dominate('<div></div>', {context});
         expect(el.ownerDocument).to.equal(context);

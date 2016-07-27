@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+
 import { expect } from 'chai';
 import dominate from '../../src/dominate';
 
@@ -160,7 +162,6 @@ describe('dominate (HTML5)', () => {
     it('should load script src', (done) => {
         const el = dominate('<script src="test-file.js"></script>');
         expect(el.nodeName.toLowerCase()).to.equal('script');
-        /* eslint-disable no-unused-expressions */
         expect(window.bar).to.not.exist;
         el.onload = function onLoad() {
             expect(window.bar).to.exist;
@@ -168,22 +169,18 @@ describe('dominate (HTML5)', () => {
             done();
         };
         document.body.appendChild(el);
-        /* eslint-enable no-unused-expressions */
     });
 
     it('should execute embedded script by default', () => {
         const el = dominate('<div><script>window.foo = "foo";</script></div>');
-        /* eslint-disable no-unused-expressions */
         expect(window.foo).to.not.exist;
         document.body.appendChild(el);
         expect(window.foo).to.exist;
-        /* eslint-enable no-unused-expressions */
         delete window.foo;
     });
 
     it('should load embedded script src by default', (done) => {
         const el = dominate('<div><script src="test-file.js"></script></div>');
-        /* eslint-disable no-unused-expressions */
         expect(window.bar).to.not.exist;
         el.firstChild.onload = function onLoad() {
             expect(window.bar).to.exist;
@@ -191,10 +188,9 @@ describe('dominate (HTML5)', () => {
             done();
         };
         document.body.appendChild(el);
-        /* eslint-enable no-unused-expressions */
     });
 
-    it('should remove embedded scripts if provided false as third argument', () => {
+    it('should remove embedded scripts if `scripts` option is set to false', () => {
         const el = dominate('<div><script></script></div>', {scripts: false});
         expect(el.childNodes.length).to.equal(0);
     });
