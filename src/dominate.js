@@ -1,7 +1,11 @@
-// Regex to extract the tag name
+/**
+ * Regular expression to extract the tag name
+ */
 const tagNameRe = /<([\w-]+)/;
 
-// Determine if `DOMParser` supports 'text/html'
+/**
+ * Determine if `DOMParser` supports 'text/html'
+ */
 const supportsDOMParserHTML = (() => {
     try {
         if ((new DOMParser()).parseFromString('', 'text/html')) {
@@ -12,10 +16,12 @@ const supportsDOMParserHTML = (() => {
     }
 })();
 
-// Prevent the parser from ignoring certain
-// elements by wrapping them with the necessary
-// parent elements to appease XHTML compliance
-// (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
+/**
+ * Prevent the parser from ignoring certain
+ * elements by wrapping them with the necessary
+ * parent elements to appease XHTML compliance
+ * courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js
+ */
 const wrapMap = {
     thead: [1, '<table>', '</table>'],
     col: [2, '<table><colgroup>', '</colgroup></table>'],
@@ -26,7 +32,9 @@ const wrapMap = {
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 wrapMap.th = wrapMap.td;
 
-// Support SVG elements
+/**
+ * Support SVG elements
+ */
 'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach((tag) => {
     wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
 });
