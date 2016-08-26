@@ -9,28 +9,28 @@ Convert a single element HTML string into a DOM element:
 
 ``` javascript
 const div = dominate('<div>foo</div>');
-console.log(div.nodeName); // DIV
+div.nodeName; // DIV
 ```
 
 Convert a multiple element HTML string into a document fragment:
 
 ``` javascript
 const frag = dominate('<strong>Hello</strong> <em>World</em>');
-console.log(frag.nodeName); // #document-fragment
+frag.nodeName; // #document-fragment
 ```
 
 Convert plain text to a DOM text node:
 
 ``` javascript
 const text = dominate('This is plain text.');
-console.log(text.nodeName); // #text
+text.nodeName; // #text
 ```
 
 Convert an SVG element into a DOM element:
 
 ``` javascript
 const rect = dominate('<rect x="10" y="10" width="100" height="100"/>');
-console.log(rect instanceof SVGRectElement); // true
+rect instanceof SVGRectElement; // true
 ```
 
 Executes script tags within an HTML string by default:
@@ -52,16 +52,17 @@ Use a custom document instead of the default (`window.document`)
 ``` javascript
 import { jsdom } from 'jsdom';
 const doc = jsdom('<html><body></body></html>');
+
 const el = dominate('<div></div>', {context: doc});
-console.log(el.ownerDocument === doc); // true
+el.ownerDocument === doc; // true
 ```
 
 Convert XML string into a DOM element:
 
 ``` javascript
 const xml = dominate('<name>foo</name>', {type: 'xml'});
-console.log(xml instanceof Element); // true
-console.log(xml instanceof HTMLElement); // false
+xml instanceof Element; // true
+xml instanceof HTMLElement; // false
 ```
 
 ## Installation
