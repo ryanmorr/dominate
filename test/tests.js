@@ -8064,10 +8064,14 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = dominate;
-// Regex to extract the tag name
+/**
+ * Regular expression to extract the tag name
+ */
 var tagNameRe = /<([\w-]+)/;
 
-// Determine if `DOMParser` supports 'text/html'
+/**
+ * Determine if `DOMParser` supports 'text/html'
+ */
 var supportsDOMParserHTML = function () {
     try {
         if (new DOMParser().parseFromString('', 'text/html')) {
@@ -8078,10 +8082,12 @@ var supportsDOMParserHTML = function () {
     }
 }();
 
-// Prevent the parser from ignoring certain
-// elements by wrapping them with the necessary
-// parent elements to appease XHTML compliance
-// (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
+/**
+ * Prevent the parser from ignoring certain
+ * elements by wrapping them with the necessary
+ * parent elements to appease XHTML compliance
+ * courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js
+ */
 var wrapMap = {
     thead: [1, '<table>', '</table>'],
     col: [2, '<table><colgroup>', '</colgroup></table>'],
@@ -8092,10 +8098,25 @@ var wrapMap = {
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 wrapMap.th = wrapMap.td;
 
-// Support SVG elements
-'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach(function (tag) {
+/**
+ * Support SVG elements
+ */
+/* 'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach((tag) => {
     wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
-});
+}); */
+
+/**
+ * SVG elements
+ */
+var svgTags = ['animate', 'animateColor', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'foreignObject', 'filter', 'g', 'gradient', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'tref', 'tspan', 'use', 'view'];
+
+/**
+ * Add wrap to all SVG elements
+ */
+var svgWrap = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
+svgTags.reduce(function (wrap, tag) {
+    return wrapMap[tag] = wrap;
+}, svgWrap);
 
 /**
  * Copy the attributes from one node to another
@@ -8243,7 +8264,7 @@ function dominate(html) {
         return context.createTextNode(html);
     }
     // Get the tag name
-    var tag = match[1].toLowerCase();
+    var tag = match[1];
     // Parse the HTML string into a DOM node
     var el = parse(context, tag, html.trim());
     // If it's a script element, return it as it
@@ -8291,6 +8312,8 @@ var _dominate2 = _interopRequireDefault(_dominate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/* eslint-disable no-unused-expressions */
+
 var toString = {}.toString;
 
 function isElementSupported(tag) {
@@ -8336,7 +8359,6 @@ describe('dominate (HTML5)', function () {
     it('should load script src', function (done) {
         var el = (0, _dominate2.default)('<script src="test-file.js"></script>');
         (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('script');
-        /* eslint-disable no-unused-expressions */
         (0, _chai.expect)(window.bar).to.not.exist;
         el.onload = function onLoad() {
             (0, _chai.expect)(window.bar).to.exist;
@@ -8344,22 +8366,18 @@ describe('dominate (HTML5)', function () {
             done();
         };
         document.body.appendChild(el);
-        /* eslint-enable no-unused-expressions */
     });
 
     it('should execute embedded script by default', function () {
         var el = (0, _dominate2.default)('<div><script>window.foo = "foo";</script></div>');
-        /* eslint-disable no-unused-expressions */
         (0, _chai.expect)(window.foo).to.not.exist;
         document.body.appendChild(el);
         (0, _chai.expect)(window.foo).to.exist;
-        /* eslint-enable no-unused-expressions */
         delete window.foo;
     });
 
     it('should load embedded script src by default', function (done) {
         var el = (0, _dominate2.default)('<div><script src="test-file.js"></script></div>');
-        /* eslint-disable no-unused-expressions */
         (0, _chai.expect)(window.bar).to.not.exist;
         el.firstChild.onload = function onLoad() {
             (0, _chai.expect)(window.bar).to.exist;
@@ -8367,10 +8385,9 @@ describe('dominate (HTML5)', function () {
             done();
         };
         document.body.appendChild(el);
-        /* eslint-enable no-unused-expressions */
     });
 
-    it('should remove embedded scripts if provided false as third argument', function () {
+    it('should remove embedded scripts if `scripts` option is set to false', function () {
         var el = (0, _dominate2.default)('<div><script></script></div>', { scripts: false });
         (0, _chai.expect)(el.childNodes.length).to.equal(0);
     });
@@ -8390,13 +8407,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 describe('dominate (SVG)', function () {
     var toString = {}.toString;
 
-    var tags = ['circle', 'ellipse', 'g', 'image', 'line', 'path', 'polygon', 'polyline', 'rect', 'text'];
+    var tags = ['animate', 'animateColor', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'foreignObject', 'filter', 'g', 'gradient', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'tref', 'tspan', 'use', 'view'];
 
     tags.forEach(function (tag) {
         it('should support ' + tag + ' elements', function () {
             var el = (0, _dominate2.default)('<' + tag + '></' + tag + '>');
-            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag);
-            (0, _chai.expect)(toString.call(el)).to.match(/^\[object SVG\w+Element\]$/);
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal(tag.toLowerCase());
+            (0, _chai.expect)(el.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+            (0, _chai.expect)(toString.call(el)).to.match(/^\[object SVG\w*Element\]$/);
         });
 
         it('should support ' + tag + ' elements with attributes', function () {
@@ -8490,7 +8508,7 @@ describe('dominate', function () {
         (0, _chai.expect)(node.ownerDocument).to.equal(document);
     });
 
-    it('should support a document object as an optional second argument', function () {
+    it('should support a document object provided via the `context` option', function () {
         var context = document.implementation.createHTMLDocument('');
         var el = (0, _dominate2.default)('<div></div>', { context: context });
         (0, _chai.expect)(el.ownerDocument).to.equal(context);

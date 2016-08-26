@@ -33,11 +33,51 @@ wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.the
 wrapMap.th = wrapMap.td;
 
 /**
- * Support SVG elements
+ * SVG elements
  */
-'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach((tag) => {
-    wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
-});
+const svgTags = [
+    'animate',
+    'animateColor',
+    'animateMotion',
+    'animateTransform',
+    'circle',
+    'clipPath',
+    'defs',
+    'desc',
+    'ellipse',
+    'foreignObject',
+    'filter',
+    'g',
+    'gradient',
+    'image',
+    'line',
+    'linearGradient',
+    'marker',
+    'mask',
+    'metadata',
+    'path',
+    'pattern',
+    'polygon',
+    'polyline',
+    'radialGradient',
+    'rect',
+    'set',
+    'stop',
+    'switch',
+    'symbol',
+    'text',
+    'textPath',
+    'tref',
+    'tspan',
+    'use',
+    'view'
+];
+
+/**
+ * Add wrap to support SVG elements
+ */
+const svgWrap = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
+svgTags.reduce((wrap, tag) => (wrapMap[tag] = wrap), svgWrap);
 
 /**
  * Copy the attributes from one node to another
@@ -176,7 +216,7 @@ export default function dominate(html, {context = document, type = 'html', scrip
         return context.createTextNode(html);
     }
     // Get the tag name
-    const tag = match[1].toLowerCase();
+    const tag = match[1];
     // Parse the HTML string into a DOM node
     const el = parse(context, tag, html.trim());
     // If it's a script element, return it as it
