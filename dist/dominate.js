@@ -1,4 +1,4 @@
-/*! dominate v0.1.1 | https://github.com/ryanmorr/dominate */
+/*! dominate v0.2.0 | https://github.com/ryanmorr/dominate */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.dominate = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
@@ -6,10 +6,14 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = dominate;
-// Regex to extract the tag name
+/**
+ * Regular expression to extract the tag name
+ */
 var tagNameRe = /<([\w-]+)/;
 
-// Determine if `DOMParser` supports 'text/html'
+/**
+ * Determine if `DOMParser` supports 'text/html'
+ */
 var supportsDOMParserHTML = function () {
     try {
         if (new DOMParser().parseFromString('', 'text/html')) {
@@ -20,10 +24,12 @@ var supportsDOMParserHTML = function () {
     }
 }();
 
-// Prevent the parser from ignoring certain
-// elements by wrapping them with the necessary
-// parent elements to appease XHTML compliance
-// (courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js)
+/**
+ * Prevent the parser from ignoring certain
+ * elements by wrapping them with the necessary
+ * parent elements to appease XHTML compliance
+ * courtesy of jQuery: https://github.com/jquery/jquery/blob/master/src/manipulation/wrapMap.js
+ */
 var wrapMap = {
     thead: [1, '<table>', '</table>'],
     col: [2, '<table><colgroup>', '</colgroup></table>'],
@@ -34,10 +40,18 @@ var wrapMap = {
 wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead;
 wrapMap.th = wrapMap.td;
 
-// Support SVG elements
-'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach(function (tag) {
-    wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
-});
+/**
+ * SVG elements
+ */
+var svgTags = ['animate', 'animateColor', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'foreignObject', 'filter', 'g', 'gradient', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'tref', 'tspan', 'use', 'view'];
+
+/**
+ * Add wrap to support SVG elements
+ */
+var svgWrap = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
+svgTags.reduce(function (wrap, tag) {
+    return wrapMap[tag] = wrap;
+}, svgWrap);
 
 /**
  * Copy the attributes from one node to another
@@ -185,7 +199,7 @@ function dominate(html) {
         return context.createTextNode(html);
     }
     // Get the tag name
-    var tag = match[1].toLowerCase();
+    var tag = match[1];
     // Parse the HTML string into a DOM node
     var el = parse(context, tag, html.trim());
     // If it's a script element, return it as it
