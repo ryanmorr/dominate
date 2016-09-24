@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import dominate from '../../src/dominate';
 
-describe('dominate (XML)', () => {
+describe('XML', () => {
     it('should support XML elements', () => {
         const el = dominate('<name>foo</name>', {type: 'xml'});
         expect(el.nodeType).to.equal(1);

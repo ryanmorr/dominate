@@ -10,7 +10,7 @@ function isElementSupported(tag) {
     return toString.call(el) !== '[object HTMLUnknownElement]';
 }
 
-describe('dominate (HTML5)', () => {
+describe('HTML', () => {
     const tags = [
         'a',
         'abbr',

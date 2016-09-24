@@ -8099,19 +8099,12 @@ wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.the
 wrapMap.th = wrapMap.td;
 
 /**
- * Support SVG elements
- */
-/* 'circle ellipse g image line path polygon polyline rect text'.split(' ').forEach((tag) => {
-    wrapMap[tag] = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
-}); */
-
-/**
  * SVG elements
  */
 var svgTags = ['animate', 'animateColor', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'foreignObject', 'filter', 'g', 'gradient', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'tref', 'tspan', 'use', 'view'];
 
 /**
- * Add wrap to all SVG elements
+ * Add wrap to support SVG elements
  */
 var svgWrap = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
 svgTags.reduce(function (wrap, tag) {
@@ -8293,15 +8286,68 @@ module.exports = exports['default'];
 },{}],42:[function(require,module,exports){
 'use strict';
 
-require('./test-dominate.js');
+var _chai = require('chai');
 
-require('./test-dominate-html.js');
+var _dominate = require('../../src/dominate');
 
-require('./test-dominate-svg.js');
+var _dominate2 = _interopRequireDefault(_dominate);
 
-require('./test-dominate-xml.js');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./test-dominate-html.js":43,"./test-dominate-svg.js":44,"./test-dominate-xml.js":45,"./test-dominate.js":46}],43:[function(require,module,exports){
+describe('dominate', function () {
+    var toString = {}.toString;
+
+    it('should convert a single element HTML string into a DOM element', function () {
+        var el = (0, _dominate2.default)('<div>foo</div>');
+        (0, _chai.expect)(el.nodeType).to.equal(1);
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
+        (0, _chai.expect)(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
+        (0, _chai.expect)(el.textContent).to.equal('foo');
+        (0, _chai.expect)(el.ownerDocument).to.equal(document);
+    });
+
+    it('should convert a multiple element HTML string into a DOM fragment', function () {
+        var frag = (0, _dominate2.default)('<div>foo</div><span>bar</span><em>baz</em>');
+        (0, _chai.expect)(frag.nodeType).to.equal(11);
+        (0, _chai.expect)(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
+        (0, _chai.expect)(toString.call(frag)).to.equal('[object DocumentFragment]');
+        (0, _chai.expect)(frag.querySelectorAll('*')).to.have.lengthOf(3);
+        (0, _chai.expect)(frag.querySelectorAll('div')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.querySelectorAll('span')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.querySelectorAll('em')).to.have.lengthOf(1);
+        (0, _chai.expect)(frag.textContent).to.equal('foobarbaz');
+        (0, _chai.expect)(frag.ownerDocument).to.equal(document);
+    });
+
+    it('should convert plain text to a DOM text node', function () {
+        var node = (0, _dominate2.default)('foo');
+        (0, _chai.expect)(node.nodeType).to.equal(3);
+        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
+        (0, _chai.expect)(toString.call(node)).to.equal('[object Text]');
+        (0, _chai.expect)(node.nodeValue).to.equal('foo');
+        (0, _chai.expect)(node.ownerDocument).to.equal(document);
+    });
+
+    it('should support a document object provided via the `context` option', function () {
+        var context = document.implementation.createHTMLDocument('');
+        var el = (0, _dominate2.default)('<div></div>', { context: context });
+        (0, _chai.expect)(el.ownerDocument).to.equal(context);
+    });
+
+    it('should ignore leading/trailing whitespace for an HTML string', function () {
+        var el = (0, _dominate2.default)(' <i>foo</i> ');
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('i');
+        (0, _chai.expect)(el.textContent).to.equal('foo');
+    });
+
+    it('should preserve leading/trailing whitespace for plain text', function () {
+        var node = (0, _dominate2.default)(' some random text  ');
+        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
+        (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
+    });
+});
+
+},{"../../src/dominate":41,"chai":5}],43:[function(require,module,exports){
 'use strict';
 
 var _chai = require('chai');
@@ -8321,7 +8367,7 @@ function isElementSupported(tag) {
     return toString.call(el) !== '[object HTMLUnknownElement]';
 }
 
-describe('dominate (HTML5)', function () {
+describe('HTML', function () {
     var tags = ['a', 'abbr', 'address', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'blockquote', 'body', 'button', 'canvas', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'div', 'dl', 'dt', 'em', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'html', 'i', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'menu', 'menuitem', 'meter', 'nav', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'script', 'section', 'select', 'shadow', 'small', 'source', 'span', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'u', 'ul', 'var', 'video'];
 
     var selfCLosingTags = ['area', 'base', 'br', 'embed', 'hr', 'iframe', 'img', 'input', 'link', 'meta', 'param', 'track', 'wbr'];
@@ -8396,6 +8442,17 @@ describe('dominate (HTML5)', function () {
 },{"../../src/dominate":41,"chai":5}],44:[function(require,module,exports){
 'use strict';
 
+require('./dominate.js');
+
+require('./html.js');
+
+require('./svg.js');
+
+require('./xml.js');
+
+},{"./dominate.js":42,"./html.js":43,"./svg.js":45,"./xml.js":46}],45:[function(require,module,exports){
+'use strict';
+
 var _chai = require('chai');
 
 var _dominate = require('../../src/dominate');
@@ -8404,7 +8461,7 @@ var _dominate2 = _interopRequireDefault(_dominate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-describe('dominate (SVG)', function () {
+describe('SVG', function () {
     var toString = {}.toString;
 
     var tags = ['animate', 'animateColor', 'animateMotion', 'animateTransform', 'circle', 'clipPath', 'defs', 'desc', 'ellipse', 'foreignObject', 'filter', 'g', 'gradient', 'image', 'line', 'linearGradient', 'marker', 'mask', 'metadata', 'path', 'pattern', 'polygon', 'polyline', 'radialGradient', 'rect', 'set', 'stop', 'switch', 'symbol', 'text', 'textPath', 'tref', 'tspan', 'use', 'view'];
@@ -8430,7 +8487,7 @@ describe('dominate (SVG)', function () {
     });
 });
 
-},{"../../src/dominate":41,"chai":5}],45:[function(require,module,exports){
+},{"../../src/dominate":41,"chai":5}],46:[function(require,module,exports){
 'use strict';
 
 var _chai = require('chai');
@@ -8441,7 +8498,7 @@ var _dominate2 = _interopRequireDefault(_dominate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-describe('dominate (XML)', function () {
+describe('XML', function () {
     it('should support XML elements', function () {
         var el = (0, _dominate2.default)('<name>foo</name>', { type: 'xml' });
         (0, _chai.expect)(el.nodeType).to.equal(1);
@@ -8463,68 +8520,4 @@ describe('dominate (XML)', function () {
     });
 });
 
-},{"../../src/dominate":41,"chai":5}],46:[function(require,module,exports){
-'use strict';
-
-var _chai = require('chai');
-
-var _dominate = require('../../src/dominate');
-
-var _dominate2 = _interopRequireDefault(_dominate);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-describe('dominate', function () {
-    var toString = {}.toString;
-
-    it('should convert a single element HTML string into a DOM element', function () {
-        var el = (0, _dominate2.default)('<div>foo</div>');
-        (0, _chai.expect)(el.nodeType).to.equal(1);
-        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
-        (0, _chai.expect)(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
-        (0, _chai.expect)(el.textContent).to.equal('foo');
-        (0, _chai.expect)(el.ownerDocument).to.equal(document);
-    });
-
-    it('should convert a multiple element HTML string into a DOM fragment', function () {
-        var frag = (0, _dominate2.default)('<div>foo</div><span>bar</span><em>baz</em>');
-        (0, _chai.expect)(frag.nodeType).to.equal(11);
-        (0, _chai.expect)(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
-        (0, _chai.expect)(toString.call(frag)).to.equal('[object DocumentFragment]');
-        (0, _chai.expect)(frag.querySelectorAll('*')).to.have.lengthOf(3);
-        (0, _chai.expect)(frag.querySelectorAll('div')).to.have.lengthOf(1);
-        (0, _chai.expect)(frag.querySelectorAll('span')).to.have.lengthOf(1);
-        (0, _chai.expect)(frag.querySelectorAll('em')).to.have.lengthOf(1);
-        (0, _chai.expect)(frag.textContent).to.equal('foobarbaz');
-        (0, _chai.expect)(frag.ownerDocument).to.equal(document);
-    });
-
-    it('should convert plain text to a DOM text node', function () {
-        var node = (0, _dominate2.default)('foo');
-        (0, _chai.expect)(node.nodeType).to.equal(3);
-        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
-        (0, _chai.expect)(toString.call(node)).to.equal('[object Text]');
-        (0, _chai.expect)(node.nodeValue).to.equal('foo');
-        (0, _chai.expect)(node.ownerDocument).to.equal(document);
-    });
-
-    it('should support a document object provided via the `context` option', function () {
-        var context = document.implementation.createHTMLDocument('');
-        var el = (0, _dominate2.default)('<div></div>', { context: context });
-        (0, _chai.expect)(el.ownerDocument).to.equal(context);
-    });
-
-    it('should ignore leading/trailing whitespace for an HTML string', function () {
-        var el = (0, _dominate2.default)(' <i>foo</i> ');
-        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('i');
-        (0, _chai.expect)(el.textContent).to.equal('foo');
-    });
-
-    it('should preserve leading/trailing whitespace for plain text', function () {
-        var node = (0, _dominate2.default)(' some random text  ');
-        (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
-        (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
-    });
-});
-
-},{"../../src/dominate":41,"chai":5}]},{},[42]);
+},{"../../src/dominate":41,"chai":5}]},{},[44]);

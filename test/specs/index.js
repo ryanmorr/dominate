@@ -1,4 +1,4 @@
-import './test-dominate.js';
-import './test-dominate-html.js';
-import './test-dominate-svg.js';
-import './test-dominate-xml.js';
+import './dominate.js';
+import './html.js';
+import './svg.js';
+import './xml.js';

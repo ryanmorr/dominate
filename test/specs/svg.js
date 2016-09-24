@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import dominate from '../../src/dominate';
 
-describe('dominate (SVG)', () => {
+describe('SVG', () => {
     const toString = {}.toString;
 
     const tags = [
