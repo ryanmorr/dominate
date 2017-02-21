@@ -4,6 +4,11 @@
 const tagNameRe = /<([\w-]+)/;
 
 /**
+ * Check if the browser supports the <template> element
+ */
+const supportsTemplate = 'content' in document.createElement('template');
+
+/**
  * Determine if `DOMParser` supports 'text/html'
  */
 const supportsDOMParserHTML = (() => {
@@ -80,6 +85,17 @@ const svgWrap = [1, '<svg xmlns="http://www.w3.org/2000/svg">', '</svg>'];
 svgTags.reduce((wrap, tag) => (wrapMap[tag] = wrap), svgWrap);
 
 /**
+ * Is the tag an SVG tag
+ *
+ * @param {String} tag
+ * @return {Boolean}
+ * @api private
+ */
+function isSVG(tag) {
+    return svgTags.indexOf(tag) !== -1;
+}
+
+/**
  * Copy the attributes from one node to another
  *
  * @param {Element} el
@@ -130,14 +146,46 @@ function parseDocument(markup, type) {
  * element
  *
  * @param {Document} doc
+ * @param {String} html
+ * @param {String} tag
+ * @return {Element}
+ * @api private
+ */
+function parseHTML(doc, html, tag = 'div') {
+    const el = doc.createElement(tag);
+    el.innerHTML = html;
+    return el;
+}
+
+/**
+ * Parse HTML elements
+ *
+ * @param {Document} doc
  * @param {String} tag
  * @param {String} html
  * @return {Element}
  * @api private
  */
-function parseHTML(doc, tag, html) {
-    const el = doc.createElement(tag);
-    el.innerHTML = html;
+function parseElements(doc, tag, html) {
+    // Use the <template> element if it is supported and
+    // the tag is not an SVG element
+    if (supportsTemplate && !isSVG(tag)) {
+        // Create a template element to parse the HTML string
+        const template = doc.createElement('template');
+        template.innerHTML = html;
+        // Clone and return the document fragment within
+        // the template
+        return doc.importNode(template.content, true);
+    }
+    // Wrap the element in the appropriate container
+    const wrap = wrapMap[tag] || wrapMap._default;
+    // Parse HTML string
+    let el = parseHTML(doc, wrap[1] + html + wrap[2]);
+    // Descend through wrappers to get the right element
+    let depth = wrap[0];
+    while (depth--) {
+        el = el.lastChild;
+    }
     return el;
 }
 
@@ -159,24 +207,17 @@ function parse(doc, tag, html) {
         // Attributes of the <html> element do not get
         // parsed using `innerHTML` here, so we parse it
         // as XML and then copy the attributes
-        const el = parseHTML(doc, 'html', html);
+        const el = parseHTML(doc, html, 'html');
         const xml = parseDocument(html, 'text/xml');
         return copyAttributes(el, xml);
     }
     // Support <body> and <head> elements
     if (tag === 'head' || tag === 'body') {
-        const el = parseHTML(doc, 'html', html);
+        const el = parseHTML(doc, html, 'html');
         return el.removeChild(tag === 'head' ? el.firstChild : el.lastChild);
     }
-    // Wrap the element in the appropriate container
-    const wrap = wrapMap[tag] || wrapMap._default;
-    // Parse HTML string
-    let el = parseHTML(doc, 'div', wrap[1] + html + wrap[2]);
-    // Descend through wrappers to get the right element
-    let depth = wrap[0];
-    while (depth--) {
-        el = el.lastChild;
-    }
+    // Support every other element
+    const el = parseElements(doc, tag, html);
     // Support executable <script> elements
     if (tag === 'script') {
         return copyScript(doc, el.firstChild);
