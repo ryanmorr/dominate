@@ -65,6 +65,22 @@ xml instanceof Element; // true
 xml instanceof HTMLElement; // false
 ```
 
+Supports [tagged template literals](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Template_literals#Tagged_template_literals):
+
+``` javascript
+const names = ['John', 'Amy', 'Joe'];
+
+const el = dominate`
+    <div>
+        <ul>
+            ${names.map(name => `<li>${name}</li>`)}
+        </ul>
+    </div>
+`;
+
+document.body.appendChild(el);
+```
+
 ## Installation
 
 Dominate is [CommonJS](http://www.commonjs.org/) and [AMD](https://github.com/amdjs/amdjs-api/wiki/AMD) compatible with no dependencies. You can download the [development](http://github.com/ryanmorr/dominate/raw/master/dist/dominate.js) or [minified](http://github.com/ryanmorr/dominate/raw/master/dist/dominate.min.js) version, or install it in one of the following ways:

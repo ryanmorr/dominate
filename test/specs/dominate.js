@@ -52,4 +52,20 @@ describe('dominate', () => {
         expect(node.nodeName.toLowerCase()).to.equal('#text');
         expect(node.nodeValue).to.equal(' some random text  ');
     });
+
+    it('should support tagged template literal invocation', () => {
+        const items = ['foo', 'bar', 'baz'];
+        const el = dominate`
+            <div>
+                <ul>
+                    ${items.map(item => `<li>${item}</li>`)}
+                </ul>
+            </div>
+        `;
+        expect(el.nodeType).to.equal(1);
+        expect(el.nodeName.toLowerCase()).to.equal('div');
+        [].forEach.call(el.querySelectorAll('li'), (li, i) => {
+            expect(li.textContent).to.equal(items[i]);
+        });
+    });
 });

@@ -96,6 +96,28 @@ function isSVG(tag) {
 }
 
 /**
+ * Are the passed arguments a result of a
+ * tagged template literal invocation
+ *
+ * @param {Arguments} args
+ * @return {Boolean}
+ * @api private
+ */
+function isTaggedTemplate(args) {
+    if (!args || typeof args !== 'object') {
+        return false;
+    }
+    const strings = args[0];
+    return (
+        strings &&
+        Array.isArray(strings) &&
+        Array.isArray(strings.raw) &&
+        typeof strings[0] === 'string' &&
+        typeof strings.raw[0] === 'string'
+    ) || false;
+}
+
+/**
  * Copy the attributes from one node to another
  *
  * @param {Element} el
@@ -246,6 +268,11 @@ function parse(doc, tag, html) {
  * @api public
  */
 export default function dominate(html, {context = document, type = 'html', scripts = true} = {}) {
+    // Check if it is a tagged template invocation
+    if (isTaggedTemplate(arguments)) {
+        const [strings, ...values] = arguments;
+        return dominate(strings.raw.reduce((acc, str, i) => acc + (values[i - 1]).join('') + str));
+    }
     // Return an XML element if the type param is 'xml'
     if (type.toLowerCase() === 'xml') {
         return parseDocument(html, 'text/xml');

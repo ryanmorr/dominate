@@ -8063,6 +8063,9 @@ Library.prototype.test = function(obj, type) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 exports.default = dominate;
 /**
  * Regular expression to extract the tag name
@@ -8125,6 +8128,22 @@ svgTags.reduce(function (wrap, tag) {
  */
 function isSVG(tag) {
     return svgTags.indexOf(tag) !== -1;
+}
+
+/**
+ * Are the passed arguments a result of a
+ * tagged template literal invocation
+ *
+ * @param {Arguments} args
+ * @return {Boolean}
+ * @api private
+ */
+function isTaggedTemplate(args) {
+    if (!args || (typeof args === 'undefined' ? 'undefined' : _typeof(args)) !== 'object') {
+        return false;
+    }
+    var strings = args[0];
+    return strings && Array.isArray(strings) && Array.isArray(strings.raw) && typeof strings[0] === 'string' && typeof strings.raw[0] === 'string' || false;
 }
 
 /**
@@ -8280,6 +8299,8 @@ function parse(doc, tag, html) {
  * @api public
  */
 function dominate(html) {
+    var _arguments2 = arguments;
+
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var _ref$context = _ref.context;
@@ -8289,6 +8310,24 @@ function dominate(html) {
     var _ref$scripts = _ref.scripts;
     var scripts = _ref$scripts === undefined ? true : _ref$scripts;
 
+    // Check if it is a tagged template invocation
+    if (isTaggedTemplate(arguments)) {
+        var _ret = function () {
+            var _arguments = Array.prototype.slice.call(_arguments2);
+
+            var strings = _arguments[0];
+
+            var values = _arguments.slice(1);
+
+            return {
+                v: dominate(strings.raw.reduce(function (acc, str, i) {
+                    return acc + values[i - 1].join('') + str;
+                }))
+            };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    }
     // Return an XML element if the type param is 'xml'
     if (type.toLowerCase() === 'xml') {
         return parseDocument(html, 'text/xml');
@@ -8329,6 +8368,8 @@ module.exports = exports['default'];
 },{}],42:[function(require,module,exports){
 'use strict';
 
+var _templateObject = _taggedTemplateLiteral(['\n            <div>\n                <ul>\n                    ', '\n                </ul>\n            </div>\n        '], ['\n            <div>\n                <ul>\n                    ', '\n                </ul>\n            </div>\n        ']);
+
 var _chai = require('chai');
 
 var _dominate = require('../../src/dominate');
@@ -8336,6 +8377,8 @@ var _dominate = require('../../src/dominate');
 var _dominate2 = _interopRequireDefault(_dominate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 describe('dominate', function () {
     var toString = {}.toString;
@@ -8387,6 +8430,18 @@ describe('dominate', function () {
         var node = (0, _dominate2.default)(' some random text  ');
         (0, _chai.expect)(node.nodeName.toLowerCase()).to.equal('#text');
         (0, _chai.expect)(node.nodeValue).to.equal(' some random text  ');
+    });
+
+    it('should support tagged template literal invocation', function () {
+        var items = ['foo', 'bar', 'baz'];
+        var el = (0, _dominate2.default)(_templateObject, items.map(function (item) {
+            return '<li>' + item + '</li>';
+        }));
+        (0, _chai.expect)(el.nodeType).to.equal(1);
+        (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('div');
+        [].forEach.call(el.querySelectorAll('li'), function (li, i) {
+            (0, _chai.expect)(li.textContent).to.equal(items[i]);
+        });
     });
 });
 
