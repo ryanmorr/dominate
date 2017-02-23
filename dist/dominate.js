@@ -1,10 +1,13 @@
-/*! dominate v0.2.1 | https://github.com/ryanmorr/dominate */
+/*! dominate v0.3.0 | https://github.com/ryanmorr/dominate */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.dominate = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 exports.default = dominate;
 /**
  * Regular expression to extract the tag name
@@ -67,6 +70,22 @@ svgTags.reduce(function (wrap, tag) {
  */
 function isSVG(tag) {
     return svgTags.indexOf(tag) !== -1;
+}
+
+/**
+ * Are the passed arguments a result of a
+ * tagged template literal invocation
+ *
+ * @param {Arguments} args
+ * @return {Boolean}
+ * @api private
+ */
+function isTaggedTemplate(args) {
+    if (!args || (typeof args === 'undefined' ? 'undefined' : _typeof(args)) !== 'object') {
+        return false;
+    }
+    var strings = args[0];
+    return strings && Array.isArray(strings) && Array.isArray(strings.raw) && typeof strings[0] === 'string' && typeof strings.raw[0] === 'string' || false;
 }
 
 /**
@@ -222,6 +241,8 @@ function parse(doc, tag, html) {
  * @api public
  */
 function dominate(html) {
+    var _arguments2 = arguments;
+
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var _ref$context = _ref.context;
@@ -231,6 +252,24 @@ function dominate(html) {
     var _ref$scripts = _ref.scripts;
     var scripts = _ref$scripts === undefined ? true : _ref$scripts;
 
+    // Check if it is a tagged template invocation
+    if (isTaggedTemplate(arguments)) {
+        var _ret = function () {
+            var _arguments = Array.prototype.slice.call(_arguments2);
+
+            var strings = _arguments[0];
+
+            var values = _arguments.slice(1);
+
+            return {
+                v: dominate(strings.raw.reduce(function (acc, str, i) {
+                    return acc + values[i - 1].join('') + str;
+                }))
+            };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    }
     // Return an XML element if the type param is 'xml'
     if (type.toLowerCase() === 'xml') {
         return parseDocument(html, 'text/xml');
