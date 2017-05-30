@@ -8535,6 +8535,26 @@ describe('HTML', function () {
         var el = (0, _dominate2.default)('<div><script></script></div>', { scripts: false });
         (0, _chai.expect)(el.childNodes.length).to.equal(0);
     });
+
+    if (document.registerElement) {
+        document.registerElement('custom-element');
+
+        it('should support custom elements', function () {
+            var el = (0, _dominate2.default)('<custom-element></custom-element>');
+            (0, _chai.expect)(el.nodeName.toLowerCase()).to.equal('custom-element');
+        });
+
+        it('should support custom elements with attributes', function () {
+            var el = (0, _dominate2.default)('<custom-element id="foo" class="bar"></custom-element>');
+            (0, _chai.expect)(el.id).to.equal('foo');
+            (0, _chai.expect)(el.className).to.equal('bar');
+        });
+
+        it('should return a custom element with no parent node', function () {
+            var el = (0, _dominate2.default)('<custom-element></custom-element>');
+            (0, _chai.expect)(el.parentNode).to.equal(null);
+        });
+    }
 });
 
 },{"../../src/dominate":41,"chai":5}],44:[function(require,module,exports){

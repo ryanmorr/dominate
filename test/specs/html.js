@@ -194,4 +194,24 @@ describe('HTML', () => {
         const el = dominate('<div><script></script></div>', {scripts: false});
         expect(el.childNodes.length).to.equal(0);
     });
+
+    if (document.registerElement) {
+        document.registerElement('custom-element');
+
+        it('should support custom elements', () => {
+            const el = dominate('<custom-element></custom-element>');
+            expect(el.nodeName.toLowerCase()).to.equal('custom-element');
+        });
+
+        it('should support custom elements with attributes', () => {
+            const el = dominate('<custom-element id="foo" class="bar"></custom-element>');
+            expect(el.id).to.equal('foo');
+            expect(el.className).to.equal('bar');
+        });
+
+        it('should return a custom element with no parent node', () => {
+            const el = dominate('<custom-element></custom-element>');
+            expect(el.parentNode).to.equal(null);
+        });
+    }
 });
