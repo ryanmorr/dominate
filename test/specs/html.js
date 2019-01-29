@@ -155,12 +155,12 @@ describe('HTML', () => {
     });
 
     it('should load script src', (done) => {
-        const el = dominate('<script src="test/test-file.js"></script>');
+        const el = dominate('<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>');
         expect(el.nodeName.toLowerCase()).to.equal('script');
-        expect(window.bar).to.not.exist;
+        expect(window.jQuery).to.not.exist;
         el.onload = function onLoad() {
-            expect(window.bar).to.exist;
-            delete window.bar;
+            expect(window.jQuery).to.exist;
+            delete window.jQuery;
             done();
         };
         document.body.appendChild(el);
@@ -175,11 +175,11 @@ describe('HTML', () => {
     });
 
     it('should load embedded script src by default', (done) => {
-        const el = dominate('<div><script src="test/test-file.js"></script></div>');
-        expect(window.bar).to.not.exist;
+        const el = dominate('<div><script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script></div>');
+        expect(window.jQuery).to.not.exist;
         el.firstChild.onload = function onLoad() {
-            expect(window.bar).to.exist;
-            delete window.bar;
+            expect(window.jQuery).to.exist;
+            delete window.jQuery;
             done();
         };
         document.body.appendChild(el);
