@@ -267,15 +267,13 @@ export default function dominate(html, {context = document, type = 'html', scrip
     if (tag === 'script') {
         return el;
     }
-    const elements = el.querySelectorAll('script');
-    for (let i = 0, len = elements.length, script, parent; i < len; i++) {
-        script = elements[i];
-        parent = script.parentNode;
+    Array.from(el.querySelectorAll('script')).forEach((script) => {
+        const parent = script.parentNode;
         if (scripts === false) {
             parent.removeChild(script);
         } else {
             parent.replaceChild(copyScript(context, script), script);
         }
-    }
+    });
     return el;
 }
