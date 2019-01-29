@@ -1,9 +1,5 @@
 import dominate from '../../src/dominate';
-
-function isElementSupported(tag) {
-    const el = document.createElement(tag);
-    return {}.toString.call(el) !== '[object HTMLUnknownElement]';
-}
+import { externalScriptSrc, isElementSupported } from '../setup';
 
 describe('HTML', () => {
     const tags = [
@@ -155,7 +151,7 @@ describe('HTML', () => {
     });
 
     it('should load script src', (done) => {
-        const el = dominate('<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>');
+        const el = dominate(`<script src="${externalScriptSrc}"></script>`);
         expect(el.nodeName.toLowerCase()).to.equal('script');
         expect(window.jQuery).to.not.exist;
         el.onload = function onLoad() {
@@ -175,7 +171,7 @@ describe('HTML', () => {
     });
 
     it('should load embedded script src by default', (done) => {
-        const el = dominate('<div><script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script></div>');
+        const el = dominate(`<div><script src="${externalScriptSrc}"></script></div>`);
         expect(window.jQuery).to.not.exist;
         el.firstChild.onload = function onLoad() {
             expect(window.jQuery).to.exist;

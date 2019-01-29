@@ -1,13 +1,12 @@
 import dominate from '../../src/dominate';
+import { type } from '../setup';
 
 describe('dominate', () => {
-    const toString = {}.toString;
-
     it('should convert a single element HTML string into a DOM element', () => {
         const el = dominate('<div>foo</div>');
         expect(el.nodeType).to.equal(1);
         expect(el.nodeName.toLowerCase()).to.equal('div');
-        expect(toString.call(el)).to.match(/^\[object HTML\w+Element\]$/);
+        expect(type(el)).to.equal('HTMLDivElement');
         expect(el.textContent).to.equal('foo');
         expect(el.ownerDocument).to.equal(document);
     });
@@ -16,7 +15,7 @@ describe('dominate', () => {
         const frag = dominate('<div>foo</div><span>bar</span><em>baz</em>');
         expect(frag.nodeType).to.equal(11);
         expect(frag.nodeName.toLowerCase()).to.equal('#document-fragment');
-        expect(toString.call(frag)).to.equal('[object DocumentFragment]');
+        expect(type(frag)).to.equal('DocumentFragment');
         expect(frag.querySelectorAll('*')).to.have.lengthOf(3);
         expect(frag.querySelectorAll('div')).to.have.lengthOf(1);
         expect(frag.querySelectorAll('span')).to.have.lengthOf(1);
@@ -29,7 +28,7 @@ describe('dominate', () => {
         const node = dominate('foo');
         expect(node.nodeType).to.equal(3);
         expect(node.nodeName.toLowerCase()).to.equal('#text');
-        expect(toString.call(node)).to.equal('[object Text]');
+        expect(type(node)).to.equal('Text');
         expect(node.nodeValue).to.equal('foo');
         expect(node.ownerDocument).to.equal(document);
     });

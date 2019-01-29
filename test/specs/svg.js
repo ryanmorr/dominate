@@ -1,8 +1,6 @@
 import dominate from '../../src/dominate';
 
 describe('SVG', () => {
-    const toString = {}.toString;
-
     const tags = [
         'animate',
         'animateColor',
@@ -46,7 +44,7 @@ describe('SVG', () => {
             const el = dominate(`<${tag}></${tag}>`);
             expect(el.nodeName.toLowerCase()).to.equal(tag.toLowerCase());
             expect(el.namespaceURI).to.equal('http://www.w3.org/2000/svg');
-            expect(toString.call(el)).to.match(/^\[object SVG\w*Element\]$/);
+            expect({}.toString.call(el)).to.match(/^\[object SVG\w*Element\]$/);
         });
 
         it(`should support ${tag} elements with attributes`, () => {
