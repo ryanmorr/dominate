@@ -186,12 +186,18 @@ describe('HTML', () => {
         expect(el.childNodes.length).to.equal(0);
     });
 
-    if (document.registerElement) {
-        document.registerElement('custom-element');
+    if (customElements && customElements.define) {
+        customElements.define('custom-element', class CustomElement extends HTMLElement {
+            constructor() {
+                super();
+                this.textContent = 'I am a custom element';
+            }
+        });
 
         it('should support custom elements', () => {
             const el = dominate('<custom-element></custom-element>');
             expect(el.nodeName.toLowerCase()).to.equal('custom-element');
+            expect(el.textContent).to.equal('I am a custom element');
         });
 
         it('should support custom elements with attributes', () => {
