@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import dominate from '../../src/dominate';
 
 describe('dominate', () => {

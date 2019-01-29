@@ -1,13 +1,8 @@
-/* eslint-disable no-unused-expressions */
-
-import { expect } from 'chai';
 import dominate from '../../src/dominate';
-
-const toString = {}.toString;
 
 function isElementSupported(tag) {
     const el = document.createElement(tag);
-    return toString.call(el) !== '[object HTMLUnknownElement]';
+    return {}.toString.call(el) !== '[object HTMLUnknownElement]';
 }
 
 describe('HTML', () => {
@@ -160,7 +155,7 @@ describe('HTML', () => {
     });
 
     it('should load script src', (done) => {
-        const el = dominate('<script src="test-file.js"></script>');
+        const el = dominate('<script src="test/test-file.js"></script>');
         expect(el.nodeName.toLowerCase()).to.equal('script');
         expect(window.bar).to.not.exist;
         el.onload = function onLoad() {
@@ -180,7 +175,7 @@ describe('HTML', () => {
     });
 
     it('should load embedded script src by default', (done) => {
-        const el = dominate('<div><script src="test-file.js"></script></div>');
+        const el = dominate('<div><script src="test/test-file.js"></script></div>');
         expect(window.bar).to.not.exist;
         el.firstChild.onload = function onLoad() {
             expect(window.bar).to.exist;
