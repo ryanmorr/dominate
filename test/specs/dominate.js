@@ -62,7 +62,7 @@ describe('dominate', () => {
         `;
         expect(el.nodeType).to.equal(1);
         expect(el.nodeName.toLowerCase()).to.equal('div');
-        [].forEach.call(el.querySelectorAll('li'), (li, i) => {
+        Array.from(el.querySelectorAll('li'), (li, i) => {
             expect(li.textContent).to.equal(items[i]);
         });
     });
