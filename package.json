@@ -1,7 +1,7 @@
 {
   "name": "@ryanmorr/dominate",
   "description": "Convert HTML/XML markup strings into DOM objects",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "Unlicense",
   "homepage": "https://github.com/ryanmorr/dominate",
   "main": "dist/dominate.min.js",
