@@ -369,4 +369,12 @@ describe('dominate', () => {
         expect(circle.namespaceURI).to.equal('http://www.w3.org/2000/svg');
         expect(circle).to.be.instanceof(SVGElement);
     });
+
+    it('should execute scripts', () => {
+        const el = dominate`<script>window.foo = "foo";</script>`;
+        expect(window.foo).to.not.exist;
+        document.body.appendChild(el);
+        expect(window.foo).to.exist;
+        delete window.foo;
+    });
 });
