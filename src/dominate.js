@@ -9,8 +9,39 @@ function getNode(node) {
     return (typeof node === 'string') ? document.createTextNode(node) : node;
 }
 
+function setAttribute(element, name, value) {
+    if (name === 'style') {
+        if (typeof value === 'string') {
+            element.style.cssText = value;
+        } else {
+            for (const key in value) {
+                const style = value == null || value[key] == null ? '' : value[key];
+                if (key[0] === '-') {
+                    element.style.setProperty(key, style);
+                } else {
+                    element.style[key] = style;
+                }
+            }
+        }
+    } else {
+        if (value === true) {
+            value = '';
+        }
+        element.setAttribute(name, value);
+    }
+}
+
 function createElement(nodeName, attributes, ...children) {
-    return document.createElement(nodeName);
+    const element = document.createElement(nodeName);
+    if (attributes) {
+        for (const name in attributes) {
+            setAttribute(element, name, attributes[name]);
+        }
+    }
+    if (children) {
+        children.forEach((child) => element.appendChild(getNode(child)));
+    }
+    return element;
 }
 
 export default function dom(...args) {
