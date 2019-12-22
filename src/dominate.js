@@ -2,6 +2,45 @@ import htm from 'htm';
 
 const html = htm.bind(createElement);
 
+const SVG_TAGS = [
+    'animate',
+    'animateColor',
+    'animateMotion',
+    'animateTransform',
+    'circle',
+    'clipPath',
+    'defs',
+    'desc',
+    'ellipse',
+    'foreignObject',
+    'filter',
+    'g',
+    'gradient',
+    'image',
+    'line',
+    'linearGradient',
+    'marker',
+    'mask',
+    'metadata',
+    'path',
+    'pattern',
+    'polygon',
+    'polyline',
+    'radialGradient',
+    'rect',
+    'set',
+    'stop',
+    'svg',
+    'switch',
+    'symbol',
+    'text',
+    'textPath',
+    'tref',
+    'tspan',
+    'use',
+    'view'
+];
+
 function arrayToFrag(nodes) {
     return nodes.reduce((frag, node) => frag.appendChild(getNode(node)) && frag, document.createDocumentFragment());
 }
@@ -41,7 +80,9 @@ function setAttribute(element, name, value) {
 }
 
 function createElement(nodeName, attributes, ...children) {
-    const element = document.createElement(nodeName);
+    const element = SVG_TAGS.includes(nodeName)
+        ? document.createElementNS('http://www.w3.org/2000/svg', nodeName)
+        : document.createElement(nodeName);
     if (attributes) {
         for (const name in attributes) {
             setAttribute(element, name, attributes[name]);

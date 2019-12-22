@@ -354,4 +354,19 @@ describe('dominate', () => {
         const el = dominate`<div>${children}</div>`;
         expect(el.outerHTML).to.equal('<div>foo<div>bar</div><span></span></div>');
     });
+
+    it('should support SVG', () => {
+        const svg = dominate`<svg><circle cx="50" cy="50" r="40" fill="red"></circle></svg>`;
+
+        expect(svg.outerHTML).to.equal('<svg><circle cx="50" cy="50" r="40" fill="red"></circle></svg>');
+
+        expect(svg.nodeType).to.equal(1);
+        expect(svg.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+        expect(svg).to.be.instanceof(SVGElement);
+
+        const circle = svg.querySelector('circle');
+        expect(circle.nodeType).to.equal(1);
+        expect(circle.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+        expect(circle).to.be.instanceof(SVGElement);
+    });
 });
