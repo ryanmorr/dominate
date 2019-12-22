@@ -221,4 +221,112 @@ describe('dominate', () => {
         document.body.appendChild(el);
         el.dispatchEvent(event);
     });
+
+    it('should support a child text node', () => {
+        const el = dominate`<div>foo</div>`;
+
+        expect(el.outerHTML).to.equal('<div>foo</div>');
+    });
+
+    it('should support NUL characters in a child text node', () => {
+        let el = dominate`<div>\0</div>`;
+        expect(el.outerHTML).to.equal('<div>\0</div>');
+
+        el = dominate`<div>\0${'foo'}</div>`;
+        expect(el.outerHTML).to.equal('<div>\0foo</div>');
+    });
+
+    it('should support a child element', () => {
+        let el = dominate`<div><span /></div>`;
+        expect(el.outerHTML).to.equal('<div><span></span></div>');
+
+        el = dominate`<div><span></span></div>`;
+        expect(el.outerHTML).to.equal('<div><span></span></div>');
+    });
+
+    it('should support multiple element children', () => {
+        let el = dominate`<div><span /><em /><p></p></div>`;
+        expect(el.outerHTML).to.equal('<div><span></span><em></em><p></p></div>');
+
+        el = dominate`<div a><span b /><em c /></div>`;
+        expect(el.outerHTML).to.equal('<div a=""><span b=""></span><em c=""></em></div>');
+
+        el = dominate`<div x=1><span y=2 /><em z=3 /></div>`;
+        expect(el.outerHTML).to.equal('<div x="1"><span y="2"></span><em z="3"></em></div>');
+
+        el = dominate`<div x=${1}><span y=${2} /><em z=${3} /></div>`;
+        expect(el.outerHTML).to.equal('<div x="1"><span y="2"></span><em z="3"></em></div>');
+    });
+
+    it('should support a dynamic text node', () => {
+        const el = dominate`<div>${'foo'}</div>`;
+
+        expect(el.outerHTML).to.equal('<div>foo</div>');
+    });
+
+    it('should support a dynamic element', () => {
+        let el = dominate`<div>${document.createElement('span')}</div>`;
+        expect(el.outerHTML).to.equal('<div><span></span></div>');
+
+        el = dominate`<div>${dominate`<span></span>`}</div>`;
+        expect(el.outerHTML).to.equal('<div><span></span></div>');
+    });
+
+    it('should escape HTML characters', () => {
+        const el = dominate`<div>${'<i id="foo" class=\'bar\'>bar</i>'}</div>`;
+
+        expect(el.outerHTML).to.equal('<div>&lt;i id="foo" class=\'bar\'&gt;bar&lt;/i&gt;</div>');
+    });
+
+    it('should support mixed type children', () => {
+        let el = dominate`<div>${'foo'}bar</div>`;
+        expect(el.outerHTML).to.equal('<div>foobar</div>');
+
+        el = dominate`<div>before${'foo'}after</div>`;
+        expect(el.outerHTML).to.equal('<div>beforefooafter</div>');
+
+        el = dominate`<div>foo<span /></div>`;
+        expect(el.outerHTML).to.equal('<div>foo<span></span></div>');
+
+        el = dominate`<div><span />foo</div>`;
+        expect(el.outerHTML).to.equal('<div><span></span>foo</div>');
+
+        el = dominate`<div>foo<span />bar</div>`;
+        expect(el.outerHTML).to.equal('<div>foo<span></span>bar</div>');
+
+        el = dominate`<div>foo<span a="b" /></div>`;
+        expect(el.outerHTML).to.equal('<div>foo<span a="b"></span></div>');
+
+        el = dominate`<div>before${document.createElement('span')}</div>`;
+        expect(el.outerHTML).to.equal('<div>before<span></span></div>');
+
+        el = dominate`<div>${document.createElement('span')}after</div>`;
+        expect(el.outerHTML).to.equal('<div><span></span>after</div>');
+
+        el = dominate`<div>before${document.createElement('span')}after</div>`;
+        expect(el.outerHTML).to.equal('<div>before<span></span>after</div>');
+
+        el = dominate`<div>before${dominate`<span></span>`}</div>`;
+        expect(el.outerHTML).to.equal('<div>before<span></span></div>');
+
+        el = dominate`<div>${dominate`<span></span>`}after</div>`;
+        expect(el.outerHTML).to.equal('<div><span></span>after</div>');
+
+        el = dominate`<div>before${dominate`<span></span>`}after</div>`;
+        expect(el.outerHTML).to.equal('<div>before<span></span>after</div>');
+
+        el = dominate`
+            <div>
+                foo
+                ${'bar'}
+                <em />
+                ${'<span></span>'}
+                baz
+                ${document.createElement('p')}
+                ${dominate`<i />`}
+                qux
+            </div>
+        `;
+        expect(el.outerHTML).to.equal('<div>foobar<em></em>&lt;span&gt;&lt;/span&gt;baz<p></p><i></i>qux</div>');
+    });
 });
