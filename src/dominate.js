@@ -2,13 +2,6 @@ import htm from 'htm';
 
 const html = htm.bind(createElement);
 
-const EVENTS = [];
-for (const prop in document) {
-    if (prop.substring(0, 2) === 'on' && (document[prop] === null || typeof document[prop] === 'function')) {
-        EVENTS.push(prop);
-    }
-}
-
 function arrayToFrag(nodes) {
     return nodes.reduce((frag, node) => frag.appendChild(getNode(node)) && frag, document.createDocumentFragment());
 }
@@ -37,7 +30,7 @@ function setAttribute(element, name, value) {
                 }
             }
         }
-    } else if (EVENTS.includes(name)) {
+    } else if (name.substring(0, 2) === 'on' && typeof value === 'function') {
         element.addEventListener(name.slice(2).toLowerCase(), value);
     } else {
         if (value === true) {

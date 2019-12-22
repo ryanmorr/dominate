@@ -222,6 +222,20 @@ describe('dominate', () => {
         el.dispatchEvent(event);
     });
 
+    it('should support custom events', (done) => {
+        let event = new CustomEvent('foo');
+
+        const callback = sinon.spy((e) => {
+            expect(e).to.equal(event);
+            document.body.removeChild(el);
+            done();
+        });
+
+        const el = dominate`<div onfoo=${callback}></div>`;
+        document.body.appendChild(el);
+        el.dispatchEvent(event);
+    });
+
     it('should support a child text node', () => {
         const el = dominate`<div>foo</div>`;
 
