@@ -397,4 +397,13 @@ describe('dominate', () => {
         expect(el.outerHTML).to.equal('<foo-bar></foo-bar>');
         expect(customElementSpy.callCount).to.equal(1);
     });
+
+    it('should ignore leading/trailing line breaks', () => {
+        const el = dominate`
+            <div></div>
+        `;
+
+        expect(el.nodeType).to.equal(1);
+        expect(el.outerHTML).to.equal('<div></div>');
+    });
 });
