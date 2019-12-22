@@ -377,4 +377,24 @@ describe('dominate', () => {
         expect(window.foo).to.exist;
         delete window.foo;
     });
+
+    it('should support custom elements', () => {
+        const customElementSpy = sinon.spy();
+
+        customElements.define('foo-bar', class FooBar extends HTMLElement {
+            constructor() {
+                super();
+                customElementSpy();
+            }
+        });
+
+        const el = dominate`
+            <foo-bar></foo-bar>
+        `;
+
+        expect(el.nodeType).to.equal(1);
+        expect(el.nodeName).to.equal('FOO-BAR');
+        expect(el.outerHTML).to.equal('<foo-bar></foo-bar>');
+        expect(customElementSpy.callCount).to.equal(1);
+    });
 });
