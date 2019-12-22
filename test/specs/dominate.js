@@ -425,4 +425,38 @@ describe('dominate', () => {
         expect(el.nodeType).to.equal(1);
         expect(el.outerHTML).to.equal('<div id="foo" class="bar"><span>baz</span></div>');
     });
+
+    it('should support returning multiple elements via ref attributes', () => {
+        const { foo, bar, baz } = dominate`
+            <div ref="foo">
+                <span ref="bar"></span>
+                <em ref="baz"></em>
+            </div>
+        `;
+
+        expect(foo.outerHTML).to.equal('<div><span></span><em></em></div>');
+        expect(bar.outerHTML).to.equal('<span></span>');
+        expect(baz.outerHTML).to.equal('<em></em>');
+    });
+
+    it('should support refs for document fragments', () => {
+        const { foo, bar } = dominate`
+            <div ref="foo"></div>
+            <span ref="bar"></span>
+        `;
+
+        expect(foo.outerHTML).to.equal('<div></div>');
+        expect(bar.outerHTML).to.equal('<span></span>');
+    });
+
+    it('should support inner refs', () => {
+        const { foo, bar } = dominate`
+            <div ref="foo">
+                ${dominate`<span ref="bar"></span>`}
+            </div>
+        `;
+
+        expect(foo.outerHTML).to.equal('<div><span></span></div>');
+        expect(bar.outerHTML).to.equal('<span></span>');
+    });
 });

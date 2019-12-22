@@ -2,6 +2,9 @@ import htm from 'htm';
 
 const html = htm.bind(createElement);
 
+const REF_KEY = Symbol('ref');
+const RESULT_KEY = Symbol('result');
+
 const SVG_TAGS = [
     'animate',
     'animateColor',
@@ -46,6 +49,9 @@ function arrayToFrag(nodes) {
 }
 
 function getNode(node) {
+    if (typeof node === 'object' && RESULT_KEY in node) {
+        return node[RESULT_KEY];
+    }
     if (Array.isArray(node)) {
         return arrayToFrag(node);
     }
@@ -56,6 +62,10 @@ function getNode(node) {
 }
 
 function setAttribute(element, name, value) {
+    if (name === 'ref') {
+        element[REF_KEY] = value;
+        return;
+    }
     if (name === 'style') {
         if (typeof value === 'string') {
             element.style.cssText = value;
@@ -99,11 +109,19 @@ function createElement(nodeName, attributes, ...children) {
 
 export default function dominate(...args) {
     let result = html(...args);
-    if (Array.isArray(result)) {
-        if (result.length > 1) {
-            return arrayToFrag(result);
+    result = Array.isArray(result) ? arrayToFrag(result) : getNode(result);
+    if (result.nodeType !== 3) {
+        const refs = {};
+        [result, ...result.querySelectorAll('*')].forEach((el) => {
+            if (REF_KEY in el) {
+                refs[el[REF_KEY]] = el;
+            }
+        });
+        const hasRefs = Object.keys(refs).length > 0;
+        if (hasRefs) {
+            refs[RESULT_KEY] = result;
+            return refs;
         }
-        result = result[0];
     }
-    return getNode(result);
+    return result;
 }
