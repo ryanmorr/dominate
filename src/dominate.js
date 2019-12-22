@@ -97,13 +97,13 @@ function createElement(nodeName, attributes, ...children) {
     return element;
 }
 
-export default function dom(...args) {
-    const result = html(...args);
+export default function dominate(...args) {
+    let result = html(...args);
     if (Array.isArray(result)) {
-        if (result.length === 1) {
-            return getNode(result[0]);
+        if (result.length > 1) {
+            return arrayToFrag(result);
         }
-        return arrayToFrag(result);
+        result = result[0];
     }
     return getNode(result);
 }
