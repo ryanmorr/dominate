@@ -208,4 +208,17 @@ describe('dominate', () => {
 
         expect(obj).to.deep.equal({});
     });
+
+    it('should support event listeners', (done) => {
+        const event = new MouseEvent('click');
+        const onClick = (e) => {
+            expect(e).to.equal(event);
+            document.body.removeChild(el);
+            done();
+        };
+
+        const el = dominate`<div onclick=${onClick}></div>`;
+        document.body.appendChild(el);
+        el.dispatchEvent(event);
+    });
 });
