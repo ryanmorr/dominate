@@ -11,7 +11,7 @@ export default {
     output: [
         {
             banner,
-            name: 'dom',
+            name: 'dominate',
             file: pkg.browser,
             format: 'umd',
             sourcemap: 'inline'
