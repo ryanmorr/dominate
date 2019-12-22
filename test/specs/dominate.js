@@ -37,4 +37,24 @@ describe('dominate', () => {
         expect(frag.childNodes[1].outerHTML).to.equal('<div></div>');
         expect(frag.childNodes[2].nodeValue).to.equal('bar');
     });
+
+    it('should support self-closing tags', () => {
+        const el1 = dominate`<div />`;
+        const el2 = dominate`<div/>`;
+
+        expect(el1.outerHTML).to.equal('<div></div>');
+        expect(el2.outerHTML).to.equal('<div></div>');
+    });
+
+    it('should support auto-closing tags', () => {
+        const el = dominate`<div><//>`;
+
+        expect(el.outerHTML).to.equal('<div></div>');
+    });
+
+    it('should support dynamic tag names', () => {
+        const el = dominate`<${'div'} />`;
+
+        expect(el.outerHTML).to.equal('<div></div>');
+    });
 });
