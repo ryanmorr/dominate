@@ -406,4 +406,23 @@ describe('dominate', () => {
         expect(el.nodeType).to.equal(1);
         expect(el.outerHTML).to.equal('<div></div>');
     });
+
+    it('should support functional components', () => {
+        const Component = (attributes, children) => {
+            expect(attributes).to.deep.equal({id: 'foo', class: 'bar'});
+            expect(children).to.be.an('array');
+            expect(children).to.have.length(1);
+            expect(children[0].outerHTML).to.equal('<span>baz</span>');
+            return dominate`<div ...${attributes}>${children[0]}</div>`;
+        };
+
+        const el = dominate`
+            <${Component} id="foo" class="bar">
+                <span>baz</span>
+            <//>
+        `;
+
+        expect(el.nodeType).to.equal(1);
+        expect(el.outerHTML).to.equal('<div id="foo" class="bar"><span>baz</span></div>');
+    });
 });

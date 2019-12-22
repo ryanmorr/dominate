@@ -80,6 +80,9 @@ function setAttribute(element, name, value) {
 }
 
 function createElement(nodeName, attributes, ...children) {
+    if (typeof nodeName === 'function') {
+        return nodeName(attributes, children);
+    }
     const element = SVG_TAGS.includes(nodeName)
         ? document.createElementNS('http://www.w3.org/2000/svg', nodeName)
         : document.createElement(nodeName);
