@@ -329,4 +329,15 @@ describe('dominate', () => {
         `;
         expect(el.outerHTML).to.equal('<div>foobar<em></em>&lt;span&gt;&lt;/span&gt;baz<p></p><i></i>qux</div>');
     });
+
+    it('should support an array of children', () => {
+        const children = [
+            'foo',
+            dominate`<div>bar</div>`,
+            document.createElement('span'),
+        ];
+
+        const el = dominate`<div>${children}</div>`;
+        expect(el.outerHTML).to.equal('<div>foo<div>bar</div><span></span></div>');
+    });
 });

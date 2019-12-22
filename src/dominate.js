@@ -4,12 +4,19 @@ const html = htm.bind(createElement);
 
 const EVENTS = [];
 for (const prop in document) {
-    if (prop.substring(0,2) === 'on' && (document[prop] === null || typeof document[prop] === 'function')) {
+    if (prop.substring(0, 2) === 'on' && (document[prop] === null || typeof document[prop] === 'function')) {
         EVENTS.push(prop);
     }
 }
 
+function arrayToFrag(nodes) {
+    return nodes.reduce((frag, node) => frag.appendChild(getNode(node)) && frag, document.createDocumentFragment());
+}
+
 function getNode(node) {
+    if (Array.isArray(node)) {
+        return arrayToFrag(node);
+    }
     if (typeof node === 'number') {
         node = String(node);
     }
@@ -59,9 +66,7 @@ export default function dom(...args) {
         if (result.length === 1) {
             return getNode(result[0]);
         }
-        const frag = document.createDocumentFragment();
-        result.forEach((node) => frag.appendChild(getNode(node)));
-        return frag;
+        return arrayToFrag(result);
     }
     return getNode(result);
 }
