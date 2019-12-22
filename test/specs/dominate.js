@@ -65,31 +65,10 @@ describe('dominate', () => {
         expect(el.outerHTML).to.equal('<input disabled="">');
     });
 
-    it('should support multiple boolean attributes', () => {
-        const el = dominate`<input disabled required />`;
-
-        expect(el.disabled).to.equal(true);
-        expect(el.required).to.equal(true);
-        expect(el.outerHTML).to.equal('<input disabled="" required="">');
-    });
-
     it('should support an attribute with a static value', () => {
         const el = dominate`<div id="foo"></div>`;
 
         expect(el.outerHTML).to.equal('<div id="foo"></div>');
-    });
-
-    it('should support an attribute with a static value followed by a boolean attribute', () => {
-        const el = dominate`<input type="checkbox" checked />`;
-
-        expect(el.checked).to.equal(true);
-        expect(el.outerHTML).to.equal('<input type="checkbox" checked="">');
-    });
-
-    it('should support multiple attributes with a static value', () => {
-        const el = dominate`<div id="foo" class="bar"></div>`;
-
-        expect(el.outerHTML).to.equal('<div id="foo" class="bar"></div>');
     });
 
     it('should support an attribute with an empty value', () => {
@@ -98,30 +77,14 @@ describe('dominate', () => {
         expect(el.outerHTML).to.equal('<div id=""></div>');
     });
 
-    it('should support multiple attributes with empty values', () => {
-        const el = dominate`<div id="" class=""></div>`;
-
-        expect(el.outerHTML).to.equal('<div id="" class=""></div>');
-    });
-
     it('should support an attribute with a dyanmic value', () => {
         const el = dominate`<div id=${'foo'}></div>`;
 
         expect(el.outerHTML).to.equal('<div id="foo"></div>');
     });
 
-    it('should support multiple attributes with a dynamic value', () => {
-        const el = dominate`<div id=${'foo'} class=${'bar'}></div>`;
-
-        expect(el.outerHTML).to.equal('<div id="foo" class="bar"></div>');
-    });
-
     it('should support an attribute with a quoted dynamic value', () => {
         let el = dominate`<div id="${'foo'}"></div>`;
-        expect(el.outerHTML).to.equal('<div id="foo"></div>');
-
-        // eslint-disable-next-line quotes
-        el = dominate`<div id='${"foo"}'></div>`;
         expect(el.outerHTML).to.equal('<div id="foo"></div>');
     });
 
@@ -130,12 +93,6 @@ describe('dominate', () => {
 
         expect(el.dataset.foo).to.equal('bar');
         expect(el.outerHTML).to.equal('<div data-foo="bar"></div>');
-    });
-
-    it('should support NUL characters in attribute values', () => {
-        const el = dominate`<div id="\0"></div>`;
-
-        expect(el.outerHTML).to.equal('<div id="\0"></div>');
     });
 
     it('should support CSS styles as a key/value map', () => {
@@ -168,45 +125,8 @@ describe('dominate', () => {
     });
 
     it('should support spread attributes', () => {
-        let el = dominate`<div ...${{ id: 'foo' }}></div>`;
-        expect(el.outerHTML).to.equal('<div id="foo"></div>');
-
-        el = dominate`<div a ...${{ id: 'foo' }}></div>`;
-        expect(el.outerHTML).to.equal('<div a="" id="foo"></div>');
-
-        el = dominate`<div a b ...${{ id: 'foo' }}></div>`;
-        expect(el.outerHTML).to.equal('<div a="" b="" id="foo"></div>');
-
-        el = dominate`<div ...${{ id: 'foo' }} a></div>`;
-        expect(el.outerHTML).to.equal('<div id="foo" a=""></div>');
-
-        el = dominate`<div ...${{ id: 'foo' }} a b></div>`;
-        expect(el.outerHTML).to.equal('<div id="foo" a="" b=""></div>');
-
-        el = dominate`<div a="1" ...${{ id: 'foo' }}></div>`;
-        expect(el.outerHTML).to.equal('<div a="1" id="foo"></div>');
-
-        el = dominate`<div a="1"><span b="2" ...${{ c: '3' }}/></div>`;
-        expect(el.outerHTML).to.equal('<div a="1"><span b="2" c="3"></span></div>');
-
-        el = dominate`<div a=${1} ...${{ b: 2 }}>c: ${3}</div>`;
-        expect(el.outerHTML).to.equal('<div a="1" b="2">c: 3</div>');
-
-        el = dominate`<div ...${{ a: '1' }}><span ...${{ b: '2' }}/></div>`;
-        expect(el.outerHTML).to.equal('<div a="1"><span b="2"></span></div>');
-    });
-
-    it('should support multiple spread attributes in one element', () => {
-        const el = dominate`<div ...${{ id: 'foo' }} ...${{ class: 'bar' }}></div>`;
-
+        let el = dominate`<div ...${{ id: 'foo', class: 'bar' }}></div>`;
         expect(el.outerHTML).to.equal('<div id="foo" class="bar"></div>');
-    });
-
-    it('should not mutate the spread variables', () => {
-        const obj = {};
-        dominate`<div ...${obj}></div>`;
-
-        expect(obj).to.deep.equal({});
     });
 
     it('should support event listeners', (done) => {
@@ -450,13 +370,17 @@ describe('dominate', () => {
     });
 
     it('should support inner refs', () => {
-        const { foo, bar } = dominate`
+        const Component = () => dominate`<i ref="baz"></i>`;
+
+        const { foo, bar, baz } = dominate`
             <div ref="foo">
-                ${dominate`<span ref="bar"></span>`}
+                ${dominate`<span><em ref="bar" /></span>`}
+                <${Component} />
             </div>
         `;
 
-        expect(foo.outerHTML).to.equal('<div><span></span></div>');
-        expect(bar.outerHTML).to.equal('<span></span>');
+        expect(foo.outerHTML).to.equal('<div><span><em></em></span><i></i></div>');
+        expect(bar.outerHTML).to.equal('<em></em>');
+        expect(baz.outerHTML).to.equal('<i></i>');
     });
 });
