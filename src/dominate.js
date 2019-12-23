@@ -102,7 +102,7 @@ function createElement(nodeName, attributes, ...children) {
         }
     }
     if (children) {
-        children.forEach((child) => element.appendChild(getNode(child)));
+        element.appendChild(arrayToFrag(children));
     }
     return element;
 }
