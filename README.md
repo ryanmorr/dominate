@@ -1,14 +1,14 @@
-# dominate 
+# dominate
 
 [![Version Badge][version-image]][project-url]
 [![Build Status][build-image]][build-url]
 [![License][license-image]][license-url]
 
-> Convert HTML, SVG, and XML markup strings into DOM objects.
+> Declarative DOM building
 
 ## Install
 
-Download the [development](http://github.com/ryanmorr/dominate/raw/master/dist/dominate.js) or [minified](http://github.com/ryanmorr/dominate/raw/master/dist/dominate.min.js) version, or install via NPM:
+Download the [CJS](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.cjs.js), [ESM](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.esm.js), [UMD](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.umd.js) versions or install via NPM:
 
 ``` sh
 npm install @ryanmorr/dominate
@@ -16,80 +16,84 @@ npm install @ryanmorr/dominate
 
 ## Usage
 
+Import the library:
+
+``` javascript
+import dominate from '@ryanmorr/dominate';
+```
+
 Convert a single element HTML string into a DOM element:
 
 ``` javascript
-const div = dominate('<div>foo</div>');
-div.nodeName; //=> "DIV"
+const div = dominate`<div></div>`;
 ```
 
 Convert a multiple element HTML string into a document fragment:
 
 ``` javascript
-const frag = dominate('<strong>Hello</strong> <em>World</em>');
-frag.nodeName; //=> "#document-fragment"
+const fragment = dominate`<div></div><span></span>`;
 ```
 
 Convert plain text to a DOM text node:
 
 ``` javascript
-const text = dominate('This is plain text.');
-text.nodeName; //=> "#text"
+const text = dominate`This is plain text.`;
 ```
 
-Convert an SVG element into a DOM element:
+Supports self-closing and auto-closing tags:
 
 ``` javascript
-const rect = dominate('<rect x="10" y="10" width="100" height="100"/>');
-rect instanceof SVGRectElement; //=> true
+const div = dominate`<div />`;
+const span = dominate`<span><//>`;
 ```
 
-Executes script tags within an HTML string by default:
+Set attributes:
 
 ``` javascript
-const script = dominate('<script>console.log("foo");</script>');
-document.body.appendChild(script); //=> console outputs "foo"
+const div = dominate`<div id="foo" class=${'bar'} />`;
 ```
 
-Remove script tags to prevent execution by setting the `scripts` option to false:
+Set CSS styles as a string or an object:
 
 ``` javascript
-const el = dominate('<section><script src="foo.js"></script></section>', {scripts: false});
-const script = el.querySelector('script'); //=> null
+const div = dominate`<div style=${{width: '100px', height: '100px'}}></div>`;
+const span = dominate`<span style=${'color: red; position: static;'}></span>`;
 ```
 
-Use a custom document instead of the default (`window.document`) by setting the `context` option:
+Add event listeners:
 
 ``` javascript
-import { jsdom } from 'jsdom';
-const doc = jsdom('<html><body></body></html>');
-
-const el = dominate('<div></div>', {context: doc});
-el.ownerDocument === doc; //=> true
+const div = dominate`<div onclick=${(e) => console.log('clicked!')}></div>`;
 ```
 
-Convert an XML string into a DOM element by setting the `type` option to "xml":
+Inject DOM nodes:
 
 ``` javascript
-const xml = dominate('<name>foo</name>', {type: 'xml'});
-xml instanceof Element; //=> true
-xml instanceof HTMLElement; //=> false
+const div = dominate`<div>${dominate`<span />`}</div>`;
 ```
 
-It also supports [tagged template literals](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Template_literals#Tagged_template_literals) for easy templating:
+Supports SVG elements:
 
 ``` javascript
-const names = ['John', 'Amy', 'Joe'];
+const rect = dominate`<rect x="10" y="10" width="100" height="100"/>`;
+```
 
-const el = dominate`
-    <div>
-        <ul>
-            ${names.map(name => `<li>${name}</li>`)}
-        </ul>
+Supports functional components:
+
+``` javascript
+const Component = (attributes, children) => dominate`<div ...${attributes}>${children}</div>`;
+const div = dominate`<${Component} id="foo">bar<//>`;
+```
+
+Return multiple element references via the `ref` attribute:
+
+``` javascript
+const { foo, bar, baz } = dominate`
+    <div ref="foo">
+        <span ref="bar"></span>
+        <em ref="baz"></em>
     </div>
 `;
-
-document.body.appendChild(el);
 ```
 
 ## License
