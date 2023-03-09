@@ -383,4 +383,17 @@ describe('dominate', () => {
         expect(bar.outerHTML).to.equal('<em></em>');
         expect(baz.outerHTML).to.equal('<i></i>');
     });
+
+    it('should not cache elements with identical markup', () => {
+        const text = () => dominate`foo`;
+        const element = () => dominate`<div></div>`;
+        const frag = () => dominate`<div></div><span></span>`;
+
+        expect(dominate`foo`).to.not.equal(dominate`foo`);
+        expect(dominate`<div></div>`).to.not.equal(dominate`<div></div>`);
+        expect(dominate`<div></div><span></span>`).to.not.equal(dominate`<div></div><span></span>`);
+        expect(text()).to.not.equal(text());
+        expect(element()).to.not.equal(element());
+        expect(frag()).to.not.equal(frag());
+    });
 });
