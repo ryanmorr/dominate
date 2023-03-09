@@ -84,6 +84,27 @@ const SVG_TAGS =  [
     'vkern'
 ];
 
+function createClass(obj) {
+    let output = '';
+    if (typeof obj === 'string') {
+        return obj;
+    }
+    if (Array.isArray(obj) && obj.length > 0) {
+        for (let i = 0, len = obj.length, tmp; i < len; i++) {
+            if ((tmp = createClass(obj[i])) !== '') {
+                output += (output && ' ') + tmp;
+            }
+        }
+    } else {
+        for (const cls in obj) {
+            if (obj[cls]) {
+                output += (output && ' ') + cls;
+            }
+        }
+    }
+    return output;
+}
+
 function arrayToFrag(nodes) {
     return nodes.reduce((frag, node) => frag.appendChild(getNode(node)) && frag, document.createDocumentFragment());
 }
@@ -101,18 +122,20 @@ function getNode(node) {
     return (typeof node === 'string') ? document.createTextNode(node) : node;
 }
 
-function setAttribute(element, name, value) {
+function setAttribute(element, name, value, isSvg) {
     if (name === 'ref') {
         element[REF_KEY] = value;
         return;
     }
-    if (name === 'style') {
+    if (!isSvg && (name === 'class' || name === 'className')) {
+		element.className = createClass(value);
+    } else if (name === 'style') {
         if (typeof value === 'string') {
             element.style.cssText = value;
         } else {
             for (const key in value) {
                 const style = value == null || value[key] == null ? '' : value[key];
-                if (key[0] === '-') {
+                if (key.startsWith('--')) {
                     element.style.setProperty(key, style);
                 } else {
                     element.style[key] = style;
@@ -134,12 +157,13 @@ function createElement(nodeName, attributes, ...children) {
     if (typeof nodeName === 'function') {
         return nodeName(attributes, children);
     }
-    const element = SVG_TAGS.includes(nodeName)
+    const isSvg = SVG_TAGS.includes(nodeName);
+    const element = isSvg
         ? document.createElementNS('http://www.w3.org/2000/svg', nodeName)
         : document.createElement(nodeName);
     if (attributes) {
         for (const name in attributes) {
-            setAttribute(element, name, attributes[name]);
+            setAttribute(element, name, attributes[name], isSvg);
         }
     }
     if (children) {

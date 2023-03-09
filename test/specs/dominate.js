@@ -95,6 +95,24 @@ describe('dominate', () => {
         expect(el.outerHTML).to.equal('<div data-foo="bar"></div>');
     });
 
+    it('should set the class attribute with an array', () => {
+        const el = dominate`<div class=${['foo', 'bar', 'baz']}></div>`;
+        
+        expect(el.className).to.equal('foo bar baz');
+    });
+
+    it('should set the class attribute with an object', () => {        
+        const el = dominate`<div class=${{foo: true, bar: false, baz: true}}></div>`;
+        
+        expect(el.className).to.equal('foo baz');
+    });
+
+    it('should alias className to class', () => {
+        const el = dominate`<div className="foo"></div>`;
+        
+        expect(el.className).to.equal('foo');
+    });
+
     it('should support CSS styles as a key/value map', () => {
         const el = dominate`<div style=${{width: '100px', height: '100px'}}></div>`;
 
@@ -276,9 +294,9 @@ describe('dominate', () => {
     });
 
     it('should support SVG', () => {
-        const svg = dominate`<svg><circle cx="50" cy="50" r="40" fill="red"></circle></svg>`;
+        const svg = dominate`<svg><circle class="foo" cx="50" cy="50" r="40" fill="red"></circle></svg>`;
 
-        expect(svg.outerHTML).to.equal('<svg><circle cx="50" cy="50" r="40" fill="red"></circle></svg>');
+        expect(svg.outerHTML).to.equal('<svg><circle class="foo" cx="50" cy="50" r="40" fill="red"></circle></svg>');
 
         expect(svg.nodeType).to.equal(1);
         expect(svg.namespaceURI).to.equal('http://www.w3.org/2000/svg');
@@ -286,6 +304,7 @@ describe('dominate', () => {
 
         const circle = svg.querySelector('circle');
         expect(circle.nodeType).to.equal(1);
+        expect(circle.getAttribute('class')).to.equal('foo');
         expect(circle.namespaceURI).to.equal('http://www.w3.org/2000/svg');
         expect(circle).to.be.instanceof(SVGElement);
     });
