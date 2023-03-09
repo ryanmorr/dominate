@@ -1,14 +1,14 @@
 # dominate
 
 [![Version Badge][version-image]][project-url]
-[![Build Status][build-image]][build-url]
 [![License][license-image]][license-url]
+[![Build Status][build-image]][build-url]
 
 > Declarative DOM building
 
 ## Install
 
-Download the [CJS](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.cjs.js), [ESM](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.esm.js), [UMD](https://github.com/ryanmorr/dominate/raw/master/dist/dominate.umd.js) versions or install via NPM:
+Download the [CJS](https://github.com/ryanmorr/dominate/raw/master/dist/cjs/dominate.js), [ESM](https://github.com/ryanmorr/dominate/raw/master/dist/esm/dominate.js), [UMD](https://github.com/ryanmorr/dominate/raw/master/dist/umd/dominate.js) versions or install via NPM:
 
 ``` sh
 npm install @ryanmorr/dominate
@@ -28,7 +28,7 @@ Convert a single element HTML string into a DOM element:
 const div = dominate`<div></div>`;
 ```
 
-Convert a multiple element HTML string into a document fragment:
+Convert multiple elements into a document fragment:
 
 ``` javascript
 const fragment = dominate`<div></div><span></span>`;
@@ -51,6 +51,13 @@ Set attributes:
 
 ``` javascript
 const div = dominate`<div id="foo" class=${'bar'} />`;
+```
+
+Set the class with an array or object:
+
+``` javascript
+const div = dominate`<div class=${['foo', 'bar', 'baz']}></div>`;
+const span = dominate`<span class=${{foo: true, bar: false, baz: true}}></span>`;
 ```
 
 Set CSS styles as a string or an object:
@@ -81,11 +88,14 @@ const rect = dominate`<rect x="10" y="10" width="100" height="100"/>`;
 Supports functional components:
 
 ``` javascript
-const Component = (attributes, children) => dominate`<div ...${attributes}>${children}</div>`;
+const Component = (attributes, children) => {
+    return dominate`<div ...${attributes}>${children}</div>`
+};
+
 const div = dominate`<${Component} id="foo">bar<//>`;
 ```
 
-Return multiple element references via the `ref` attribute:
+Can return multiple element references via the `ref` attribute:
 
 ``` javascript
 const { foo, bar, baz } = dominate`
@@ -101,8 +111,8 @@ const { foo, bar, baz } = dominate`
 This project is dedicated to the public domain as described by the [Unlicense](http://unlicense.org/).
 
 [project-url]: https://github.com/ryanmorr/dominate
-[version-image]: https://badge.fury.io/gh/ryanmorr%2Fdominate.svg
-[build-url]: https://travis-ci.org/ryanmorr/dominate
-[build-image]: https://travis-ci.org/ryanmorr/dominate.svg
-[license-image]: https://img.shields.io/badge/license-Unlicense-blue.svg
+[version-image]: https://img.shields.io/github/package-json/v/ryanmorr/dominate?color=blue&style=flat-square
+[build-url]: https://github.com/ryanmorr/dominate/actions
+[build-image]: https://img.shields.io/github/actions/workflow/status/ryanmorr/dominate/node.js.yml?style=flat-square
+[license-image]: https://img.shields.io/github/license/ryanmorr/dominate?color=blue&style=flat-square
 [license-url]: UNLICENSE
