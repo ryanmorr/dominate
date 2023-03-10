@@ -1,9 +1,10 @@
 import htm from 'htm';
 
 const html = htm.bind(createElement);
+
 const REF_KEY = Symbol('ref');
 const RESULT_KEY = Symbol('result');
-
+const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
 const SVG_TAGS =  [
     'svg',
     'altGlyph',
@@ -106,7 +107,12 @@ function createClass(obj) {
 }
 
 function arrayToFrag(nodes) {
-    return nodes.reduce((frag, node) => frag.appendChild(getNode(node)) && frag, document.createDocumentFragment());
+    return nodes.filter((node) => {
+        return node != null && typeof node !== 'boolean';
+    }).reduce((frag, node) => {
+        frag.appendChild(getNode(node));
+        return frag;
+    }, document.createDocumentFragment());
 }
 
 function getNode(node) {
@@ -119,7 +125,22 @@ function getNode(node) {
     if (typeof node === 'number') {
         node = String(node);
     }
-    return (typeof node === 'string') ? document.createTextNode(node) : node;
+    if (typeof node === 'string') {
+        return document.createTextNode(node);
+    }
+    return node;
+}
+
+function setStyle(element, name, value) {
+    if (name.includes('-')) {
+        element.style.setProperty(name, value == null ? '' : value);
+    } else if (value == null) {
+        element.style[name] = '';
+    } else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(name)) {
+        element.style[name] = value;
+    } else {
+        element.style[name] = value + 'px';
+    }
 }
 
 function setAttribute(element, name, value, isSvg) {
@@ -132,23 +153,34 @@ function setAttribute(element, name, value, isSvg) {
     } else if (name === 'style') {
         if (typeof value === 'string') {
             element.style.cssText = value;
-        } else {
+        } else if (value) {
             for (const key in value) {
-                const style = value == null || value[key] == null ? '' : value[key];
-                if (key.startsWith('--')) {
-                    element.style.setProperty(key, style);
-                } else {
-                    element.style[key] = style;
-                }
+                setStyle(element, key, value[key]);
             }
         }
-    } else if (name.substring(0, 2) === 'on' && typeof value === 'function') {
-        element.addEventListener(name.slice(2).toLowerCase(), value);
+    } else if (name.startsWith('on') && typeof value === 'function') {
+        name = (name.toLowerCase() in element) ? name.toLowerCase().slice(2) : name.slice(2);
+        element.addEventListener(name, value);
     } else {
-        if (value === true) {
-            value = '';
-        }
-        element.setAttribute(name, value);
+        if (
+            !isSvg &&
+			name !== 'width' &&
+			name !== 'height' &&
+			name !== 'href' &&
+			name !== 'list' &&
+			name !== 'form' &&
+			name !== 'tabIndex' &&
+			name !== 'download' &&
+			name in element
+		) {
+			try {
+				element[name] = value == null ? '' : value;
+				return;
+			} catch (e) {} // eslint-disable-line no-empty
+		}
+		if (value != null && (value !== false || name.indexOf('-') != -1)) {
+			element.setAttribute(name, value);
+		}
     }
 }
 
