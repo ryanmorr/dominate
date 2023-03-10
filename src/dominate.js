@@ -132,7 +132,7 @@ function getNode(node) {
 }
 
 function setStyle(element, name, value) {
-    if (name.includes('-')) {
+    if (name.startsWith('--')) {
         element.style.setProperty(name, value == null ? '' : value);
     } else if (value == null) {
         element.style[name] = '';

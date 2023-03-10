@@ -1,7 +1,7 @@
 import dominate from '../../src/dominate';
 
 describe('dominate', () => {
-    it('should support a single root element', () => {
+    it('should create an element', () => {
         const el = dominate`<div></div>`;
 
         expect(el.nodeType).to.equal(1);
@@ -9,7 +9,7 @@ describe('dominate', () => {
         expect(el.ownerDocument).to.equal(document);
     });
 
-    it('should support a root text node', () => {
+    it('should create a text node', () => {
         const node = dominate`foo`;
 
         expect(node.nodeType).to.equal(3);
@@ -18,7 +18,53 @@ describe('dominate', () => {
         expect(node.ownerDocument).to.equal(document);
     });
 
-    it('should support multiple root elements by returning a document fragment', () => {
+    it('should not render null', () => {
+		const el = dominate`<div>${null}</div>`;
+
+		expect(el.innerHTML).to.equal('');
+		expect(el.childNodes).to.have.length(0);
+	});
+
+	it('should not render undefined', () => {
+		const el = dominate`<div>${undefined}</div>`;
+
+		expect(el.innerHTML).to.equal('');
+		expect(el.childNodes).to.have.length(0);
+	});
+
+	it('should not render boolean true', () => {
+		const el = dominate`<div>${true}</div>`;
+
+		expect(el.innerHTML).to.equal('');
+		expect(el.childNodes).to.have.length(0);
+	});
+
+	it('should not render boolean false', () => {
+		const el = dominate`<div>${false}</div>`;
+
+		expect(el.innerHTML).to.equal('');
+		expect(el.childNodes).to.have.length(0);
+	});
+
+    it('should render NaN as text content', () => {
+		const el = dominate`<div>${NaN}</div>`;
+
+		expect(el.innerHTML).to.equal('NaN');
+	});
+
+	it('should render zero as text content', () => {
+		const el = dominate`<div>${0}</div>`;
+
+		expect(el.innerHTML).to.equal('0');
+	});
+
+	it('should render non-zero numbers as text content', () => {
+		const el = dominate`<div>${12}</div>`;
+
+		expect(el.innerHTML).to.equal('12');
+	});
+
+    it('should create multiple elements and return a document fragment', () => {
         const frag = dominate`<div></div><span></span>`;
 
         expect(frag.nodeType).to.equal(11);
@@ -28,7 +74,7 @@ describe('dominate', () => {
         expect(frag.ownerDocument).to.equal(document);
     });
 
-    it('should support a mix of multiple root elements and text nodes', () => {
+    it('should support a mix of multiple elements and text nodes', () => {
         const frag = dominate`foo<div></div>bar`;
 
         expect(frag.nodeType).to.equal(11);
@@ -212,22 +258,17 @@ describe('dominate', () => {
 
     it('should support CSS styles as an object', () => {
         const styles = {
-            backgroundPosition: '10px 10px',
-			'background-size': 'cover',
-			gridRowStart: 1,
-            width: '100px',
-			top: 50,
-			left: '100%'
+            width: '2em',
+            gridRowStart: 1,
+            'padding-top': 5,
+            'padding-bottom': '0.7ex',
+            top: 100,
+            left: '100%'
         };
 
         const el = dominate`<div style=${styles}></div>`;
 
-		expect(el.style.backgroundPosition).to.equal('10px 10px');
-		expect(el.style.backgroundSize).to.equal('cover');
-        expect(el.style.gridRowStart).to.equal('1');
-		expect(el.style.width).to.equal('100px');
-		expect(el.style.top).to.equal('50px');
-		expect(el.style.left).to.equal('100%');
+        expect(el.style.cssText).to.equal('width: 2em; grid-row-start: 1; padding-top: 5px; padding-bottom: 0.7ex; top: 100px; left: 100%;');
     });
 
     it('should support CSS styles as a string', () => {
@@ -326,52 +367,6 @@ describe('dominate', () => {
 		expect(input).to.have.property('form', form);
 
         document.body.removeChild(el);
-	});
-
-    it('should not render null', () => {
-		const el = dominate`<div>${null}</div>`;
-
-		expect(el.innerHTML).to.equal('');
-		expect(el.childNodes).to.have.length(0);
-	});
-
-	it('should not render undefined', () => {
-		const el = dominate`<div>${undefined}</div>`;
-
-		expect(el.innerHTML).to.equal('');
-		expect(el.childNodes).to.have.length(0);
-	});
-
-	it('should not render boolean true', () => {
-		const el = dominate`<div>${true}</div>`;
-
-		expect(el.innerHTML).to.equal('');
-		expect(el.childNodes).to.have.length(0);
-	});
-
-	it('should not render boolean false', () => {
-		const el = dominate`<div>${false}</div>`;
-
-		expect(el.innerHTML).to.equal('');
-		expect(el.childNodes).to.have.length(0);
-	});
-
-    it('should render NaN as text content', () => {
-		const el = dominate`<div>${NaN}</div>`;
-
-		expect(el.innerHTML).to.equal('NaN');
-	});
-
-	it('should render zero as text content', () => {
-		const el = dominate`<div>${0}</div>`;
-
-		expect(el.innerHTML).to.equal('0');
-	});
-
-	it('should render non-zero numbers as text content', () => {
-		const el = dominate`<div>${12}</div>`;
-
-		expect(el.innerHTML).to.equal('12');
 	});
 
     it('should clear falsy input values', () => {
