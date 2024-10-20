@@ -284,7 +284,7 @@ describe('dominate', () => {
         expect(el.style.color).to.equal('var(--color)');
         expect(window.getComputedStyle(el).getPropertyValue('color')).to.equal('rgb(255, 0, 0)');
         expect(window.getComputedStyle(el).getPropertyValue('--color')).to.equal('red');
-        expect(el.outerHTML).to.equal('<div style="color: var(--color); --color:red;"></div>');
+        expect(el.outerHTML).to.equal('<div style="color: var(--color); --color: red;"></div>');
         document.body.removeChild(el);
     });
 
