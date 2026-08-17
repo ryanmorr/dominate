@@ -1,7 +1,11 @@
 name: Tests
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Run at 15 mins past midnight on the 15th of every month (avoid high load periods)
+    - cron: '15 0 15 * *'
 jobs:
   test:
     name: Node.js ${{ matrix.node-version }}
